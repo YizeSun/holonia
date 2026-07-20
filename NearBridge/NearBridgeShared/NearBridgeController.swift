@@ -32,6 +32,7 @@ public final class NearBridgeController: ObservableObject {
     private var registry = NearBridgeDiscoveryRegistry()
     private let identityManager: HostIdentityManager?
     private let pairingStore = KeychainPairingRecordStore()
+    private var pairingStoreAvailable = true
     private let capabilityRegistry: NearBridgeCapabilityRegistry
     private var trustRegistry = NearBridgeTrustRegistry()
     private var pairingMachine = NearBridgePairingStateMachine()
@@ -67,6 +68,7 @@ public final class NearBridgeController: ObservableObject {
             trustRegistry = try pairingStore.load()
             pairedNodes = trustRegistry.records
         } catch {
+            pairingStoreAvailable = false
             identityIssue = [identityIssue, "Could not load pairings: \(error.localizedDescription)"].compactMap { $0 }.joined(separator: " · ")
         }
     }
@@ -102,6 +104,10 @@ public final class NearBridgeController: ObservableObject {
     public func connect(to peer: NearBridgePeer) {
         guard identityManager != nil else {
             record(category: .identity, state: "unavailable", peer: peer.id, detail: identityIssue ?? "Host identity unavailable")
+            return
+        }
+        guard pairingStoreAvailable else {
+            record(category: .frameworkError, state: "pairingStoreUnavailable", peer: peer.id, detail: "Pairing is disabled because Host trust storage is unavailable")
             return
         }
         guard ![.connecting, .connected, .reconnecting].contains(sessionState) else {
@@ -256,11 +262,18 @@ public final class NearBridgeController: ObservableObject {
     }
 
     public func revoke(_ pairedNode: PairedNodeRecord) {
-        guard trustRegistry.revoke(nodeID: pairedNode.nodeID) != nil else { return }
-        persistPairings()
-        pairedNodes = trustRegistry.records
-        record(category: .revocation, state: "revoked", peer: pairedNode.nodeID, detail: "Local trust for \(pairedNode.displayName) was revoked")
-        if remoteHello?.nodeID == pairedNode.nodeID { transport?.disconnect() }
+        var updated = trustRegistry
+        guard updated.revoke(nodeID: pairedNode.nodeID) != nil else { return }
+        do {
+            try pairingStore.save(updated)
+            trustRegistry = updated
+            pairedNodes = updated.records
+            record(category: .revocation, state: "revoked", peer: pairedNode.nodeID, detail: "Local trust for \(pairedNode.displayName) was revoked and persisted")
+            if remoteHello?.nodeID == pairedNode.nodeID { transport?.disconnect() }
+        } catch {
+            pairingStoreAvailable = false
+            record(category: .revocation, state: "revocationFailed", peer: pairedNode.nodeID, error: error, detail: "Host trust storage failed; the pairing remains trusted")
+        }
     }
 
     public func recordLifecycle(_ state: String) {
@@ -421,14 +434,24 @@ public final class NearBridgeController: ObservableObject {
     private func establishPairingIfComplete() {
         guard pairingMachine.state == .established, let remoteHello else { return }
         if !trustRegistry.contains(nodeID: remoteHello.nodeID) {
-            trustRegistry.trust(PairedNodeRecord(
+            var updated = trustRegistry
+            updated.trust(PairedNodeRecord(
                 nodeID: remoteHello.nodeID,
                 displayName: remoteHello.displayName,
                 role: remoteHello.role,
                 publicKeyBase64: remoteHello.publicKeyBase64
             ))
-            persistPairings()
-            pairedNodes = trustRegistry.records
+            do {
+                try pairingStore.save(updated)
+                trustRegistry = updated
+                pairedNodes = updated.records
+            } catch {
+                pairingStoreAvailable = false
+                authenticatedSessionState = .failed
+                record(category: .pairing, state: "pairingStoreFailed", peer: remoteHello.nodeID, error: error, detail: "Host trust storage failed; pairing was not established")
+                transport?.disconnect()
+                return
+            }
         }
         publishPendingPairing()
         record(category: .pairing, state: "paired", peer: remoteHello.nodeID, detail: "Mutual user-confirmed pairing stored by the Host")
@@ -669,14 +692,6 @@ public final class NearBridgeController: ObservableObject {
             state: pairingMachine.state,
             isKnownPairing: trustRegistry.contains(nodeID: remoteHello.nodeID)
         )
-    }
-
-    private func persistPairings() {
-        do {
-            try pairingStore.save(trustRegistry)
-        } catch {
-            record(category: .frameworkError, state: "pairingStoreFailed", error: error, detail: "Could not persist local pairing state")
-        }
     }
 
     private func resetHandshake() {
