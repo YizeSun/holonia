@@ -14,7 +14,8 @@ NearBridge 第一阶段只回答一个问题：
 - `Bonjour + Network.framework` 是进入下一阶段的暂定主方案，仍不代表设备已经可信或通过认证。
 - `NB-1` 已完成实现、共享单元测试及 macOS/iOS Device SDK 构建；真机双向发现仍明确标记为待验证。
 - `NB-2` 已完成实现与自动化验证：Host Keychain 稳定密钥、签名配对 transcript、双端验证码确认、本地可信记录与撤销；真机配对和重启持久性待验证。
-- 当前主线位于 `NB-2 → NB-3` 的边界，目标是连续推进到 `NB-5`。
+- `NB-3` 已完成实现与自动化验证：paired-key sender authentication、fresh-session binding、签名完整性、过期、去重、ping/pong/ack 相关性与清晰状态；真机交换待验证。
+- 当前主线位于 `NB-3 → NB-4` 的边界，目标是连续推进到 `NB-5`。
 - 每个 `NB` 都使用独立 Git commit 和远端 checkpoint；自动化、模拟器与真机证据分别记录，后续修复添加新 commit，不改写已测试 checkpoint。
 - 不阻塞主线的权限、生命周期、网络环境和候选技术补测记录在 [`nearbridge/deferred-validation-todo.md`](nearbridge/deferred-validation-todo.md)。
 
@@ -107,6 +108,8 @@ Mac mini 看到 iPhone
 - 消息具备 ID、发送者、类型、过期时间和完整性验证；
 - 重复消息不会重复触发上层动作；
 - 连接中断后有明确状态。
+
+当前 checkpoint 的消息保证、非保证和验证证据见 [`nearbridge/nb3-results.md`](nearbridge/nb3-results.md)。
 
 ### NB-4：联系型需求演示
 

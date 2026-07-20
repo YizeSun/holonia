@@ -23,7 +23,9 @@ public struct PairingConfirmation: Codable, Equatable, Sendable {
 
 public struct PairingEnvelope: Codable, Equatable, Identifiable, Sendable {
     public static let supportedSchemaVersion = 1
+    public static let protocolName = "nearbridge.pairing.v1"
 
+    public let protocolName: String
     public let schemaVersion: Int
     public let messageID: UUID
     public let kind: PairingMessageKind
@@ -33,12 +35,14 @@ public struct PairingEnvelope: Codable, Equatable, Identifiable, Sendable {
     public var id: UUID { messageID }
 
     public init(
+        protocolName: String = PairingEnvelope.protocolName,
         schemaVersion: Int = supportedSchemaVersion,
         messageID: UUID = UUID(),
         kind: PairingMessageKind,
         hello: PairingHello? = nil,
         confirmation: PairingConfirmation? = nil
     ) {
+        self.protocolName = protocolName
         self.schemaVersion = schemaVersion
         self.messageID = messageID
         self.kind = kind
@@ -182,6 +186,9 @@ public enum PairingProtocol {
     }
 
     private static func validate(_ envelope: PairingEnvelope) throws {
+        guard envelope.protocolName == PairingEnvelope.protocolName else {
+            throw PairingProtocolError.invalidPayload
+        }
         guard envelope.schemaVersion == PairingEnvelope.supportedSchemaVersion else {
             throw PairingProtocolError.unsupportedSchema(envelope.schemaVersion)
         }

@@ -7,6 +7,7 @@ public final class NearBridgeController: ObservableObject {
     @Published public private(set) var peers: [NearBridgePeer] = []
     @Published public private(set) var discoveryState: DiscoveryState = .stopped
     @Published public private(set) var sessionState: SessionState = .idle
+    @Published public private(set) var authenticatedSessionState: AuthenticatedSessionState = .idle
     @Published public private(set) var localNetworkAccess: LocalNetworkAccessState = .unknown
     @Published public private(set) var events: [NearBridgeEvent] = []
     @Published public private(set) var isRunning = false
@@ -14,6 +15,10 @@ public final class NearBridgeController: ObservableObject {
     @Published public private(set) var pairedNodes: [PairedNodeRecord] = []
     @Published public private(set) var pendingPairing: PendingPairing?
     @Published public private(set) var identityIssue: String?
+    @Published public private(set) var lastSentMessage: NearBridgeReliableMessage?
+    @Published public private(set) var lastReceivedMessage: NearBridgeReliableMessage?
+    @Published public private(set) var roundTripMilliseconds: Double?
+    @Published public private(set) var pendingPingCount = 0
 
     public let role: DeviceRole
     public let phase = NearBridgeBuild.phase
@@ -28,7 +33,12 @@ public final class NearBridgeController: ObservableObject {
     private var remoteHello: PairingHello?
     private var transcriptHash: Data?
     private var activePeerReference: String?
-    private let logger = Logger(subsystem: "org.holonia.nearbridge.v0", category: "pairing")
+    private var reliableValidator: ReliableMessageValidator?
+    private var activeSessionID: String?
+    private var pendingPings: [UUID: Date] = [:]
+    private var pendingAcknowledgements: Set<UUID> = []
+    private var sequence = 0
+    private let logger = Logger(subsystem: "org.holonia.nearbridge.v0", category: "authenticated-session")
 
     public init(role: DeviceRole) {
         self.role = role
@@ -112,6 +122,31 @@ public final class NearBridgeController: ObservableObject {
         transport?.disconnect()
     }
 
+    public func sendAuthenticatedPing() {
+        guard
+            authenticatedSessionState == .authenticated,
+            let identityManager,
+            let sessionID = activeSessionID
+        else {
+            record(category: .messageSend, state: "rejectedNotAuthenticated", detail: "A paired and authenticated session is required")
+            return
+        }
+        sequence += 1
+        do {
+            let ping = try ReliableMessageCodec.makePing(
+                sequence: sequence,
+                sessionID: sessionID,
+                identityManager: identityManager
+            )
+            pendingPings[ping.messageID] = Date()
+            pendingPingCount = pendingPings.count
+            send(ping, state: "sending")
+            schedulePingTimeout(ping)
+        } catch {
+            record(category: .messageSend, state: "signingFailed", error: error, detail: error.localizedDescription)
+        }
+    }
+
     public func revoke(_ pairedNode: PairedNodeRecord) {
         guard trustRegistry.revoke(nodeID: pairedNode.nodeID) != nil else { return }
         persistPairings()
@@ -148,7 +183,10 @@ public final class NearBridgeController: ObservableObject {
             sessionState = state
             activePeerReference = peer ?? activePeerReference
             record(category: .connection, state: state.rawValue, peer: peer, detail: "Pairing channel is \(state.rawValue)")
-            if state == .connected { beginHandshakeIfNeeded() }
+            if state == .connected {
+                authenticatedSessionState = .pairing
+                beginHandshakeIfNeeded()
+            }
             if state == .disconnected || state == .failed { resetHandshake() }
         case .diagnostic(let category, let state, let peer, let detail, let error):
             switch category {
@@ -165,6 +203,11 @@ public final class NearBridgeController: ObservableObject {
                 record(category: .localNetworkPermission, state: state, peer: peer, error: error, detail: detail)
             case .frameworkError, .decodingError:
                 if ["listenerFailed", "browserFailed", "failed"].contains(state) { discoveryState = .failed }
+                if ["sendFailed", "sessionNotReady", "connectionFailed"].contains(state) {
+                    authenticatedSessionState = .failed
+                    pendingPings.removeAll()
+                    pendingPingCount = 0
+                }
                 record(category: .frameworkError, state: state, peer: peer, error: error, detail: detail)
             case .peerDiscovered, .peerLost:
                 break
@@ -196,18 +239,29 @@ public final class NearBridgeController: ObservableObject {
 
     private func receive(_ data: Data, peer: String?) {
         do {
-            let envelope = try PairingProtocol.decode(data)
-            switch envelope.kind {
-            case .hello:
-                guard let hello = envelope.hello else { throw PairingProtocolError.invalidPayload }
-                try receive(hello, peer: peer)
-            case .confirmation:
-                guard let confirmation = envelope.confirmation else { throw PairingProtocolError.invalidPayload }
-                try receive(confirmation, peer: peer)
+            switch NearBridgeWireProtocol.name(in: data) {
+            case PairingEnvelope.protocolName:
+                guard authenticatedSessionState != .authenticated else {
+                    throw ReliableMessageError.unsupportedProtocol
+                }
+                let envelope = try PairingProtocol.decode(data)
+                switch envelope.kind {
+                case .hello:
+                    guard let hello = envelope.hello else { throw PairingProtocolError.invalidPayload }
+                    try receive(hello, peer: peer)
+                case .confirmation:
+                    guard let confirmation = envelope.confirmation else { throw PairingProtocolError.invalidPayload }
+                    try receive(confirmation, peer: peer)
+                }
+            case NearBridgeReliableMessage.protocolName:
+                try receiveReliableMessage(ReliableMessageCodec.decode(data), peer: peer)
+            default:
+                throw ReliableMessageError.unsupportedProtocol
             }
         } catch {
-            record(category: .pairing, state: "messageRejected", peer: peer, error: error, detail: error.localizedDescription)
-            transport?.disconnect()
+            let category: NearBridgeEventCategory = authenticatedSessionState == .authenticated ? .messageReceive : .pairing
+            record(category: category, state: "messageRejected", peer: peer, error: error, detail: error.localizedDescription)
+            if authenticatedSessionState != .authenticated { transport?.disconnect() }
         }
     }
 
@@ -270,6 +324,96 @@ public final class NearBridgeController: ObservableObject {
         }
         publishPendingPairing()
         record(category: .pairing, state: "paired", peer: remoteHello.nodeID, detail: "Mutual user-confirmed pairing stored by the Host")
+        configureAuthenticatedSession(remoteHello: remoteHello)
+    }
+
+    private func configureAuthenticatedSession(remoteHello: PairingHello) {
+        guard let transcriptHash else { return }
+        let sessionID = transcriptHash.base64EncodedString()
+        activeSessionID = sessionID
+        reliableValidator = ReliableMessageValidator(
+            expectedSenderNodeID: remoteHello.nodeID,
+            expectedSessionID: sessionID,
+            publicKeyBase64: remoteHello.publicKeyBase64
+        )
+        authenticatedSessionState = .authenticated
+        record(category: .authentication, state: "authenticated", peer: remoteHello.nodeID, detail: "Session is bound to paired keys and the fresh pairing transcript")
+    }
+
+    private func receiveReliableMessage(_ message: NearBridgeReliableMessage, peer: String?) throws {
+        guard authenticatedSessionState == .authenticated, var validator = reliableValidator else {
+            throw ReliableMessageError.unexpectedSender
+        }
+        let acceptance = try validator.validate(message)
+        reliableValidator = validator
+        switch acceptance {
+        case .duplicateIgnored(let messageID):
+            record(category: .messageReceive, state: "duplicateIgnored", peer: peer, message: messageID, detail: "Ignored duplicate message \(messageID.uuidString)")
+            return
+        case .accepted(let accepted):
+            lastReceivedMessage = accepted
+            record(category: .messageReceive, state: "accepted", peer: accepted.senderNodeID, message: accepted.messageID, detail: "Accepted signed \(accepted.messageType.rawValue) sequence \(accepted.payload.sequence)")
+            try respond(to: accepted)
+        }
+    }
+
+    private func respond(to message: NearBridgeReliableMessage) throws {
+        guard let identityManager, let sessionID = activeSessionID else {
+            throw ReliableMessageError.wrongSession
+        }
+        switch message.messageType {
+        case .ping:
+            let pong = try ReliableMessageCodec.makePong(for: message, sessionID: sessionID, identityManager: identityManager)
+            pendingAcknowledgements.insert(pong.messageID)
+            send(pong, state: "responded")
+            scheduleAcknowledgementTimeout(pong)
+        case .pong:
+            if let started = pendingPings.removeValue(forKey: message.correlationID) {
+                roundTripMilliseconds = Date().timeIntervalSince(started) * 1_000
+                pendingPingCount = pendingPings.count
+            } else {
+                record(category: .messageReceive, state: "uncorrelatedPong", peer: message.senderNodeID, message: message.messageID, detail: "Signed pong has no pending local ping")
+            }
+            send(
+                try ReliableMessageCodec.makeAcknowledgement(for: message, sessionID: sessionID, identityManager: identityManager),
+                state: "acknowledged"
+            )
+        case .acknowledgement:
+            if pendingAcknowledgements.remove(message.correlationID) != nil {
+                record(category: .messageReceive, state: "acknowledged", peer: message.senderNodeID, message: message.messageID, detail: "Peer acknowledged message \(message.correlationID.uuidString)")
+            } else {
+                record(category: .messageReceive, state: "unexpectedAcknowledgement", peer: message.senderNodeID, message: message.messageID, detail: "Acknowledgement has no pending local message")
+            }
+        }
+    }
+
+    private func send(_ message: NearBridgeReliableMessage, state: String) {
+        do {
+            lastSentMessage = message
+            transport?.send(try ReliableMessageCodec.encode(message))
+            record(category: .messageSend, state: state, peer: remoteHello?.nodeID, message: message.messageID, detail: "Sent signed \(message.messageType.rawValue) sequence \(message.payload.sequence)")
+        } catch {
+            record(category: .messageSend, state: "encodingFailed", peer: remoteHello?.nodeID, error: error, detail: error.localizedDescription)
+        }
+    }
+
+    private func schedulePingTimeout(_ ping: NearBridgeReliableMessage) {
+        let messageID = ping.messageID
+        Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
+            guard let self, self.pendingPings.removeValue(forKey: messageID) != nil else { return }
+            self.pendingPingCount = self.pendingPings.count
+            self.record(category: .timeout, state: "timedOut", message: ping.messageID, detail: "No correlated signed pong within 3 seconds for sequence \(ping.payload.sequence)")
+        }
+    }
+
+    private func scheduleAcknowledgementTimeout(_ message: NearBridgeReliableMessage) {
+        let messageID = message.messageID
+        Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
+            guard let self, self.pendingAcknowledgements.remove(messageID) != nil else { return }
+            self.record(category: .timeout, state: "ackTimedOut", message: messageID, detail: "No signed acknowledgement within 3 seconds for message \(messageID.uuidString)")
+        }
     }
 
     private func publishPendingPairing() {
@@ -303,6 +447,12 @@ public final class NearBridgeController: ObservableObject {
         transcriptHash = nil
         activePeerReference = nil
         pendingPairing = nil
+        reliableValidator = nil
+        activeSessionID = nil
+        authenticatedSessionState = .idle
+        pendingPings.removeAll()
+        pendingPingCount = 0
+        pendingAcknowledgements.removeAll()
     }
 
     private func record(_ change: NearBridgeDiscoveryChange) {
@@ -318,6 +468,7 @@ public final class NearBridgeController: ObservableObject {
         category: NearBridgeEventCategory,
         state: String,
         peer: String? = nil,
+        message: UUID? = nil,
         error: Error? = nil,
         detail: String
     ) {
@@ -327,6 +478,7 @@ public final class NearBridgeController: ObservableObject {
             category: category,
             state: state,
             peerReference: peer,
+            messageReference: message,
             error: error,
             humanReadableDetail: detail
         )

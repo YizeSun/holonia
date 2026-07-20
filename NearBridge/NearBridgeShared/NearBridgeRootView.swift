@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 
 public struct NearBridgeRootView: View {
@@ -12,9 +13,9 @@ public struct NearBridgeRootView: View {
         NavigationStack {
             List {
                 Section {
-                    Label("User-confirmed pairing", systemImage: "person.badge.key")
+                    Label("Authenticated reliable messages", systemImage: "checkmark.shield")
                         .foregroundStyle(.orange)
-                    Text("Discovery remains untrusted. Compare the six-digit code on both devices before approving.")
+                    Text("Discovery remains untrusted. Pair first; NB-3 then signs, expires, correlates, and deduplicates each message.")
                         .font(.caption)
                 }
 
@@ -70,6 +71,7 @@ public struct NearBridgeRootView: View {
 
                 Section("Pairing channel") {
                     LabeledContent("Session", value: controller.sessionState.rawValue)
+                    LabeledContent("Authentication", value: controller.authenticatedSessionState.rawValue)
                     if let pairing = controller.pendingPairing {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(pairing.displayName).bold()
@@ -104,6 +106,24 @@ public struct NearBridgeRootView: View {
                         Button("Disconnect", role: .destructive) { controller.disconnect() }
                             .buttonStyle(.bordered)
                     }
+                }
+
+                Section("Authenticated messages") {
+                    Button("Send signed ping") { controller.sendAuthenticatedPing() }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(controller.authenticatedSessionState != .authenticated || controller.pendingPingCount > 0)
+                    if let sent = controller.lastSentMessage {
+                        LabeledContent("Last sent", value: "\(sent.messageType.rawValue) #\(sent.payload.sequence)")
+                    }
+                    if let received = controller.lastReceivedMessage {
+                        LabeledContent("Last received", value: "\(received.messageType.rawValue) #\(received.payload.sequence)")
+                    }
+                    if let milliseconds = controller.roundTripMilliseconds {
+                        LabeledContent("Round trip", value: String(format: "%.1f ms", milliseconds))
+                    }
+                    Text("Messages are signed and bound to this fresh session. NB-3 does not claim payload encryption.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
 
                 Section("Paired nodes") {

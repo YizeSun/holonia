@@ -46,11 +46,13 @@ final class NearBridgeDiscoveryTests: XCTestCase {
             category: .peerFound,
             state: "untrusted",
             peerReference: "ephemeral",
+            messageReference: UUID(uuidString: "00000000-0000-0000-0000-000000000001"),
             humanReadableDetail: "Discovery is not authentication"
         )
 
         XCTAssertTrue(event.compactDescription.contains("[NB-1]"))
         XCTAssertTrue(event.compactDescription.contains("peerFound.untrusted"))
+        XCTAssertTrue(event.compactDescription.contains("00000000-0000-0000-0000-000000000001"))
         XCTAssertNoThrow(try JSONEncoder().encode(event))
     }
 }

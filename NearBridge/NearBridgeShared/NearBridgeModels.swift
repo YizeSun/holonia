@@ -19,7 +19,7 @@ public enum NearBridgePhase: Int, Codable, CaseIterable, Comparable, Sendable {
 }
 
 public enum NearBridgeBuild {
-    public static let phase = NearBridgePhase.nb2
+    public static let phase = NearBridgePhase.nb3
     public static let automatedStatus = "Automated checkpoint"
     public static let physicalStatus = "Physical validation pending"
 }
@@ -78,7 +78,18 @@ public enum NearBridgeEventCategory: String, Codable, Sendable {
     case pairing
     case revocation
     case connection
+    case authentication
+    case messageSend
+    case messageReceive
+    case timeout
     case frameworkError
+}
+
+public enum AuthenticatedSessionState: String, Codable, Sendable {
+    case idle
+    case pairing
+    case authenticated
+    case failed
 }
 
 public struct PendingPairing: Identifiable, Equatable, Sendable {
@@ -101,6 +112,7 @@ public struct NearBridgeEvent: Codable, Identifiable, Equatable, Sendable {
     public let category: NearBridgeEventCategory
     public let state: String
     public let peerReference: String?
+    public let messageReference: UUID?
     public let errorDomain: String?
     public let errorCode: Int?
     public let humanReadableDetail: String
@@ -115,6 +127,7 @@ public struct NearBridgeEvent: Codable, Identifiable, Equatable, Sendable {
         category: NearBridgeEventCategory,
         state: String,
         peerReference: String? = nil,
+        messageReference: UUID? = nil,
         error: Error? = nil,
         humanReadableDetail: String
     ) {
@@ -126,6 +139,7 @@ public struct NearBridgeEvent: Codable, Identifiable, Equatable, Sendable {
         self.category = category
         self.state = state
         self.peerReference = peerReference
+        self.messageReference = messageReference
         self.errorDomain = nsError?.domain
         self.errorCode = nsError?.code
         self.humanReadableDetail = humanReadableDetail
@@ -139,7 +153,8 @@ public struct NearBridgeEvent: Codable, Identifiable, Equatable, Sendable {
         } else {
             errorSuffix = ""
         }
-        return "\(time) [\(phase.displayName)] \(category.rawValue).\(state): \(humanReadableDetail)\(errorSuffix)"
+        let messageSuffix = messageReference.map { " [message \($0.uuidString)]" } ?? ""
+        return "\(time) [\(phase.displayName)] \(category.rawValue).\(state): \(humanReadableDetail)\(messageSuffix)\(errorSuffix)"
     }
 
     private static let timeFormatter: DateFormatter = {
