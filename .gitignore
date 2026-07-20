@@ -1,0 +1,8 @@
+.DS_Store
+NearBridge/.build/
+NearBridge/DerivedData/
+NearBridge/*.xcworkspace/xcuserdata/
+NearBridge/NearBridge.xcodeproj/xcuserdata/
+NearBridge/.swiftpm/
+NearBridge/**/xcuserdata/
+NearBridge/**/*.xcuserstate
