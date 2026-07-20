@@ -12,9 +12,9 @@ public struct NearBridgeRootView: View {
         NavigationStack {
             List {
                 Section {
-                    Label("Untrusted discovery", systemImage: "dot.radiowaves.left.and.right")
+                    Label("User-confirmed pairing", systemImage: "person.badge.key")
                         .foregroundStyle(.orange)
-                    Text("A discovered device is only a nearby candidate. Pairing and identity start in NB-2.")
+                    Text("Discovery remains untrusted. Compare the six-digit code on both devices before approving.")
                         .font(.caption)
                 }
 
@@ -22,6 +22,12 @@ public struct NearBridgeRootView: View {
                     LabeledContent("Phase", value: controller.phase.displayName)
                     LabeledContent("Automated", value: NearBridgeBuild.automatedStatus)
                     LabeledContent("Physical", value: NearBridgeBuild.physicalStatus)
+                    if let identity = controller.localIdentity {
+                        LabeledContent("Host identity", value: identity.fingerprint)
+                    }
+                    if let issue = controller.identityIssue {
+                        Text(issue).font(.caption).foregroundStyle(.red)
+                    }
                 }
 
                 Section("Discovery") {
@@ -47,20 +53,74 @@ public struct NearBridgeRootView: View {
                         Text("No nodes discovered.").foregroundStyle(.secondary)
                     }
                     ForEach(controller.peers) { peer in
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
                                 Text(peer.displayName)
-                                Spacer()
-                                Text(peer.trustState.rawValue)
-                                    .font(.caption)
-                                    .foregroundStyle(.orange)
+                                Text("Ephemeral discovery reference · untrusted")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
                             }
-                            Text(peer.discoveryReference)
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                            Text("Ephemeral discovery reference · no capabilities advertised")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Button("Pair") { controller.connect(to: peer) }
+                                .buttonStyle(.bordered)
+                                .disabled(controller.sessionState == .connecting || controller.sessionState == .connected)
+                        }
+                    }
+                }
+
+                Section("Pairing channel") {
+                    LabeledContent("Session", value: controller.sessionState.rawValue)
+                    if let pairing = controller.pendingPairing {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(pairing.displayName).bold()
+                            Text("Fingerprint \(pairing.fingerprint)").font(.caption)
+                            Text(pairing.verificationCode)
+                                .font(.system(.title, design: .monospaced, weight: .bold))
+                                .textSelection(.enabled)
+                            Text(pairing.state.rawValue).font(.caption).foregroundStyle(.secondary)
+                            if pairing.state == .awaitingLocalApproval {
+                                HStack {
+                                    Button("Codes match — Approve") { controller.approvePairing() }
+                                        .buttonStyle(.borderedProminent)
+                                    Button("Reject", role: .destructive) { controller.rejectPairing() }
+                                        .buttonStyle(.bordered)
+                                }
+                            }
+                            if pairing.state == .awaitingRemoteConfirmation {
+                                Text("Local approval recorded. Waiting for the other device.")
+                                    .font(.caption)
+                            }
+                            if pairing.state == .established {
+                                Label("Paired and stored by this Host", systemImage: "checkmark.shield.fill")
+                                    .foregroundStyle(.green)
+                            }
+                        }
+                    } else {
+                        Text("Select Pair on one device. A stranger cannot become trusted without confirmation.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    if controller.sessionState == .connected {
+                        Button("Disconnect", role: .destructive) { controller.disconnect() }
+                            .buttonStyle(.bordered)
+                    }
+                }
+
+                Section("Paired nodes") {
+                    if controller.pairedNodes.isEmpty {
+                        Text("No paired nodes.").foregroundStyle(.secondary)
+                    }
+                    ForEach(controller.pairedNodes) { record in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(record.displayName)
+                                Text("\(record.role.rawValue) · \(record.fingerprint)")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Button("Revoke", role: .destructive) { controller.revoke(record) }
+                                .buttonStyle(.bordered)
                         }
                     }
                 }

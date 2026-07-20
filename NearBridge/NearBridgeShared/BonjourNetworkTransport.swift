@@ -4,7 +4,7 @@ import Network
 final class BonjourNetworkTransport: ExperimentTransport {
     var onEvent: ((TransportEvent) -> Void)?
     var onPeersChanged: (([ExperimentPeer]) -> Void)?
-    var onMessage: ((ExperimentMessage, String?) -> Void)?
+    var onData: ((Data, String?) -> Void)?
 
     private static let serviceType = "_nearbridge-v0._tcp"
     private let queue = DispatchQueue(label: "org.holonia.nearbridge.v0.bonjour")
@@ -183,11 +183,7 @@ final class BonjourNetworkTransport: ExperimentTransport {
             let frame = Data(receiveBuffer[..<newline])
             receiveBuffer.removeSubrange(...newline)
             guard !frame.isEmpty else { continue }
-            do {
-                onMessage?(try ExperimentMessageCodec.decode(frame), peer)
-            } catch {
-                emit(.decodingError, "rejected", peer: peer, detail: "Rejected malformed or unsupported TCP message", error: error)
-            }
+            onData?(frame, peer)
         }
     }
 

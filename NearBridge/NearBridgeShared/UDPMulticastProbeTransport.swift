@@ -4,7 +4,7 @@ import Network
 final class UDPMulticastProbeTransport: ExperimentTransport {
     var onEvent: ((TransportEvent) -> Void)?
     var onPeersChanged: (([ExperimentPeer]) -> Void)?
-    var onMessage: ((ExperimentMessage, String?) -> Void)?
+    var onData: ((Data, String?) -> Void)?
 
     private let queue = DispatchQueue(label: "org.holonia.nearbridge.nb0.udp")
     private var group: NWConnectionGroup?
@@ -22,12 +22,8 @@ final class UDPMulticastProbeTransport: ExperimentTransport {
             group.setReceiveHandler(maximumMessageSize: 4_096, rejectOversizedMessages: true) { [weak self] message, data, _ in
                 guard let self, let data else { return }
                 let peer = String(describing: message.remoteEndpoint)
-                do {
-                    self.onMessage?(try ExperimentMessageCodec.decode(data), peer)
-                    self.emit(.peerDiscovered, "datagramReceived", peer: peer, detail: "Received non-sensitive multicast probe; source is not identity")
-                } catch {
-                    self.emit(.decodingError, "rejected", peer: peer, detail: "Rejected malformed multicast datagram", error: error)
-                }
+                self.onData?(data, peer)
+                self.emit(.peerDiscovered, "datagramReceived", peer: peer, detail: "Received non-sensitive multicast probe; source is not identity")
             }
             self.group = group
             group.start(queue: queue)

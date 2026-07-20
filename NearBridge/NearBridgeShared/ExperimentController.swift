@@ -115,11 +115,19 @@ public final class ExperimentController: ObservableObject {
                 self.discoveryState = peers.isEmpty ? .browsing : .peerDiscovered
             }
         }
-        candidate.onMessage = { [weak self] message, peer in
-            DispatchQueue.main.async { self?.receive(message, peer: peer) }
+        candidate.onData = { [weak self] data, peer in
+            DispatchQueue.main.async { self?.decodeAndReceive(data, peer: peer) }
         }
         candidate.onEvent = { [weak self] event in
             DispatchQueue.main.async { self?.handle(event) }
+        }
+    }
+
+    private func decodeAndReceive(_ data: Data, peer: String?) {
+        do {
+            receive(try ExperimentMessageCodec.decode(data), peer: peer)
+        } catch {
+            record(category: .decodingError, state: "rejected", peer: peer, error: error, detail: "Rejected malformed or unsupported experimental message")
         }
     }
 

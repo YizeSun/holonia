@@ -3,7 +3,7 @@ import Foundation
 protocol ExperimentTransport: AnyObject {
     var onEvent: ((TransportEvent) -> Void)? { get set }
     var onPeersChanged: (([ExperimentPeer]) -> Void)? { get set }
-    var onMessage: ((ExperimentMessage, String?) -> Void)? { get set }
+    var onData: ((Data, String?) -> Void)? { get set }
 
     func start()
     func stop()

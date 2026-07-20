@@ -4,7 +4,7 @@ import MultipeerConnectivity
 final class MultipeerTransport: NSObject, ExperimentTransport {
     var onEvent: ((TransportEvent) -> Void)?
     var onPeersChanged: (([ExperimentPeer]) -> Void)?
-    var onMessage: ((ExperimentMessage, String?) -> Void)?
+    var onData: ((Data, String?) -> Void)?
 
     private static let serviceType = "nb0-bridge"
     private let localPeer: MCPeerID
@@ -123,11 +123,7 @@ extension MultipeerTransport: MCSessionDelegate {
     }
 
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
-        do {
-            onMessage?(try ExperimentMessageCodec.decode(data), peerID.displayName)
-        } catch {
-            emit(.decodingError, "rejected", peer: peerID.displayName, detail: "Rejected malformed or unsupported MPC message", error: error)
-        }
+        onData?(data, peerID.displayName)
     }
 
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {

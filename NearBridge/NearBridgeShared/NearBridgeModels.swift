@@ -19,13 +19,14 @@ public enum NearBridgePhase: Int, Codable, CaseIterable, Comparable, Sendable {
 }
 
 public enum NearBridgeBuild {
-    public static let phase = NearBridgePhase.nb1
+    public static let phase = NearBridgePhase.nb2
     public static let automatedStatus = "Automated checkpoint"
     public static let physicalStatus = "Physical validation pending"
 }
 
 public enum PeerTrustState: String, Codable, Sendable {
     case untrusted
+    case paired
 }
 
 public enum LocalNetworkAccessState: String, Codable, Sendable {
@@ -73,7 +74,23 @@ public enum NearBridgeEventCategory: String, Codable, Sendable {
     case discovery
     case peerFound
     case peerLost
+    case identity
+    case pairing
+    case revocation
+    case connection
     case frameworkError
+}
+
+public struct PendingPairing: Identifiable, Equatable, Sendable {
+    public let nodeID: String
+    public let displayName: String
+    public let role: DeviceRole
+    public let fingerprint: String
+    public let verificationCode: String
+    public let state: PairingApprovalState
+    public let isKnownPairing: Bool
+
+    public var id: String { nodeID }
 }
 
 public struct NearBridgeEvent: Codable, Identifiable, Equatable, Sendable {

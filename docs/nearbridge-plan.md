@@ -13,7 +13,8 @@ NearBridge 第一阶段只回答一个问题：
 - `NB-0` 普通 Wi-Fi 核心真机路径已经完成：iPhone 与 Mac mini 可发现、连接、双向交换 ping/pong，并在手动断开重连后继续通信。
 - `Bonjour + Network.framework` 是进入下一阶段的暂定主方案，仍不代表设备已经可信或通过认证。
 - `NB-1` 已完成实现、共享单元测试及 macOS/iOS Device SDK 构建；真机双向发现仍明确标记为待验证。
-- 当前主线位于 `NB-1 → NB-2` 的边界，目标是连续推进到 `NB-5`。
+- `NB-2` 已完成实现与自动化验证：Host Keychain 稳定密钥、签名配对 transcript、双端验证码确认、本地可信记录与撤销；真机配对和重启持久性待验证。
+- 当前主线位于 `NB-2 → NB-3` 的边界，目标是连续推进到 `NB-5`。
 - 每个 `NB` 都使用独立 Git commit 和远端 checkpoint；自动化、模拟器与真机证据分别记录，后续修复添加新 commit，不改写已测试 checkpoint。
 - 不阻塞主线的权限、生命周期、网络环境和候选技术补测记录在 [`nearbridge/deferred-validation-todo.md`](nearbridge/deferred-validation-todo.md)。
 
@@ -96,6 +97,8 @@ Mac mini 看到 iPhone
 - 密钥归 Host 管理。
 
 具体身份算法和恢复机制尚未冻结。
+
+当前 checkpoint 的具体实现与安全边界见 [`nearbridge/nb2-results.md`](nearbridge/nb2-results.md)。
 
 ### NB-3：可靠消息会话
 
