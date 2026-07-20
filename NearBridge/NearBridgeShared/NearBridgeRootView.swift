@@ -13,9 +13,9 @@ public struct NearBridgeRootView: View {
         NavigationStack {
             List {
                 Section {
-                    Label("Authenticated reliable messages", systemImage: "checkmark.shield")
+                    Label("Contact request vertical slice", systemImage: "person.2.wave.2")
                         .foregroundStyle(.orange)
-                    Text("Discovery remains untrusted. Pair first; NB-3 then signs, expires, correlates, and deduplicates each message.")
+                    Text("NB-4 demonstrates Request → Capability Response → Contact Accepted → Completed. It does not invoke an Agent.")
                         .font(.caption)
                 }
 
@@ -113,15 +113,47 @@ public struct NearBridgeRootView: View {
                         .buttonStyle(.borderedProminent)
                         .disabled(controller.authenticatedSessionState != .authenticated || controller.pendingPingCount > 0)
                     if let sent = controller.lastSentMessage {
-                        LabeledContent("Last sent", value: "\(sent.messageType.rawValue) #\(sent.payload.sequence)")
+                        LabeledContent("Last sent", value: sent.displaySummary)
                     }
                     if let received = controller.lastReceivedMessage {
-                        LabeledContent("Last received", value: "\(received.messageType.rawValue) #\(received.payload.sequence)")
+                        LabeledContent("Last received", value: received.displaySummary)
                     }
                     if let milliseconds = controller.roundTripMilliseconds {
                         LabeledContent("Round trip", value: String(format: "%.1f ms", milliseconds))
                     }
                     Text("Messages are signed and bound to this fresh session. NB-3 does not claim payload encryption.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Section("Contact demo") {
+                    LabeledContent("State", value: controller.contactWorkflowState.rawValue)
+                    if let summary = controller.contactWorkflowSummary {
+                        Text(summary).font(.caption)
+                    }
+                    switch controller.contactWorkflowState {
+                    case .idle:
+                        Button("Request code-analysis contact") { controller.startContactRequest() }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(controller.authenticatedSessionState != .authenticated)
+                    case .requestReceived:
+                        Button("Respond: capability available") { controller.sendCapabilityResponse() }
+                            .buttonStyle(.borderedProminent)
+                    case .responseReceived:
+                        Button("Accept contact") { controller.acceptContact() }
+                            .buttonStyle(.borderedProminent)
+                    case .acceptanceReceived:
+                        Button("Mark contact completed") { controller.completeContact() }
+                            .buttonStyle(.borderedProminent)
+                    case .completed:
+                        Label("Contact flow completed", systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                    case .requestSent, .responseSent, .acceptanceSent:
+                        Text("Waiting for the paired device.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Text("This demo exchanges signed workflow messages only. No repository, model, tool, or remote command is accessed.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

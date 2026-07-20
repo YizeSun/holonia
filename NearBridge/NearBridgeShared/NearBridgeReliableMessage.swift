@@ -4,13 +4,24 @@ public enum ReliableMessageType: String, Codable, Sendable {
     case ping
     case pong
     case acknowledgement
+    case contactRequest
+    case capabilityResponse
+    case contactAccepted
+    case contactCompleted
 }
 
 public struct ReliableMessagePayload: Codable, Equatable, Sendable {
-    public let sequence: Int
+    public let sequence: Int?
+    public let contact: ContactWorkflowPayload?
 
     public init(sequence: Int) {
         self.sequence = sequence
+        contact = nil
+    }
+
+    public init(contact: ContactWorkflowPayload) {
+        sequence = nil
+        self.contact = contact
     }
 }
 
@@ -31,6 +42,16 @@ public struct NearBridgeReliableMessage: Codable, Equatable, Identifiable, Senda
     public let signatureBase64: String
 
     public var id: UUID { messageID }
+
+    public var displaySummary: String {
+        if let sequence = payload.sequence {
+            return "\(messageType.rawValue) #\(sequence)"
+        }
+        if let contact = payload.contact {
+            return "\(messageType.rawValue) · \(contact.summary)"
+        }
+        return messageType.rawValue
+    }
 
     public init(
         protocolName: String = NearBridgeReliableMessage.protocolName,
@@ -173,6 +194,125 @@ public enum ReliableMessageCodec {
         )
     }
 
+    public static func makeContactRequest(
+        requestID: UUID = UUID(),
+        capabilityID: String = ContactDemoCapability.codeProblemAnalysis,
+        summary: String = ContactDemoCapability.requestSummary,
+        sessionID: String,
+        identityManager: HostIdentityManager,
+        nowMilliseconds: Int64 = currentMilliseconds(),
+        lifetimeMilliseconds: Int64 = 30_000,
+        messageID: UUID = UUID()
+    ) throws -> NearBridgeReliableMessage {
+        try sign(
+            messageID: messageID,
+            senderNodeID: identityManager.identity.nodeID,
+            sessionID: sessionID,
+            messageType: .contactRequest,
+            sentAtMilliseconds: nowMilliseconds,
+            expiresAtMilliseconds: nowMilliseconds + lifetimeMilliseconds,
+            correlationID: messageID,
+            payload: .init(contact: .init(
+                requestID: requestID,
+                responseID: nil,
+                capabilityID: capabilityID,
+                summary: summary
+            )),
+            identityManager: identityManager
+        )
+    }
+
+    public static func makeCapabilityResponse(
+        to request: NearBridgeReliableMessage,
+        responseID: UUID = UUID(),
+        summary: String = ContactDemoCapability.responseSummary,
+        sessionID: String,
+        identityManager: HostIdentityManager,
+        nowMilliseconds: Int64 = currentMilliseconds(),
+        lifetimeMilliseconds: Int64 = 30_000,
+        messageID: UUID = UUID()
+    ) throws -> NearBridgeReliableMessage {
+        guard request.messageType == .contactRequest, let requestPayload = request.payload.contact else {
+            throw ContactWorkflowError.invalidRequest
+        }
+        return try sign(
+            messageID: messageID,
+            senderNodeID: identityManager.identity.nodeID,
+            sessionID: sessionID,
+            messageType: .capabilityResponse,
+            sentAtMilliseconds: nowMilliseconds,
+            expiresAtMilliseconds: nowMilliseconds + lifetimeMilliseconds,
+            correlationID: request.messageID,
+            payload: .init(contact: .init(
+                requestID: requestPayload.requestID,
+                responseID: responseID,
+                capabilityID: requestPayload.capabilityID,
+                summary: summary
+            )),
+            identityManager: identityManager
+        )
+    }
+
+    public static func makeContactAccepted(
+        response: NearBridgeReliableMessage,
+        summary: String = "Contact accepted by the requester",
+        sessionID: String,
+        identityManager: HostIdentityManager,
+        nowMilliseconds: Int64 = currentMilliseconds(),
+        lifetimeMilliseconds: Int64 = 30_000,
+        messageID: UUID = UUID()
+    ) throws -> NearBridgeReliableMessage {
+        guard response.messageType == .capabilityResponse, let responsePayload = response.payload.contact else {
+            throw ContactWorkflowError.invalidResponse
+        }
+        return try sign(
+            messageID: messageID,
+            senderNodeID: identityManager.identity.nodeID,
+            sessionID: sessionID,
+            messageType: .contactAccepted,
+            sentAtMilliseconds: nowMilliseconds,
+            expiresAtMilliseconds: nowMilliseconds + lifetimeMilliseconds,
+            correlationID: response.messageID,
+            payload: .init(contact: .init(
+                requestID: responsePayload.requestID,
+                responseID: responsePayload.responseID,
+                capabilityID: responsePayload.capabilityID,
+                summary: summary
+            )),
+            identityManager: identityManager
+        )
+    }
+
+    public static func makeContactCompleted(
+        acceptance: NearBridgeReliableMessage,
+        summary: String = "Contact flow completed without invoking an Agent",
+        sessionID: String,
+        identityManager: HostIdentityManager,
+        nowMilliseconds: Int64 = currentMilliseconds(),
+        lifetimeMilliseconds: Int64 = 30_000,
+        messageID: UUID = UUID()
+    ) throws -> NearBridgeReliableMessage {
+        guard acceptance.messageType == .contactAccepted, let acceptedPayload = acceptance.payload.contact else {
+            throw ContactWorkflowError.wrongState
+        }
+        return try sign(
+            messageID: messageID,
+            senderNodeID: identityManager.identity.nodeID,
+            sessionID: sessionID,
+            messageType: .contactCompleted,
+            sentAtMilliseconds: nowMilliseconds,
+            expiresAtMilliseconds: nowMilliseconds + lifetimeMilliseconds,
+            correlationID: acceptance.messageID,
+            payload: .init(contact: .init(
+                requestID: acceptedPayload.requestID,
+                responseID: acceptedPayload.responseID,
+                capabilityID: acceptedPayload.capabilityID,
+                summary: summary
+            )),
+            identityManager: identityManager
+        )
+    }
+
     public static func encode(_ message: NearBridgeReliableMessage) throws -> Data {
         try validateStructure(message)
         return try canonicalData(message)
@@ -252,8 +392,25 @@ public enum ReliableMessageCodec {
               message.expiresAtMilliseconds - message.sentAtMilliseconds <= 60_000 else {
             throw ReliableMessageError.invalidLifetime
         }
-        if message.messageType == .ping && message.correlationID != message.messageID {
-            throw ReliableMessageError.invalidCorrelation
+        switch message.messageType {
+        case .ping:
+            guard message.correlationID == message.messageID,
+                  message.payload.sequence != nil,
+                  message.payload.contact == nil else { throw ReliableMessageError.invalidCorrelation }
+        case .pong:
+            guard message.payload.sequence != nil,
+                  message.payload.contact == nil else { throw ReliableMessageError.invalidCorrelation }
+        case .contactRequest:
+            guard message.correlationID == message.messageID,
+                  message.payload.sequence == nil,
+                  message.payload.contact != nil else { throw ReliableMessageError.invalidCorrelation }
+        case .capabilityResponse, .contactAccepted, .contactCompleted:
+            guard message.payload.sequence == nil,
+                  message.payload.contact != nil else { throw ReliableMessageError.invalidCorrelation }
+        case .acknowledgement:
+            let hasSequence = message.payload.sequence != nil
+            let hasContact = message.payload.contact != nil
+            guard hasSequence != hasContact else { throw ReliableMessageError.invalidCorrelation }
         }
     }
 

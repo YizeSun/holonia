@@ -19,7 +19,7 @@ public enum NearBridgePhase: Int, Codable, CaseIterable, Comparable, Sendable {
 }
 
 public enum NearBridgeBuild {
-    public static let phase = NearBridgePhase.nb3
+    public static let phase = NearBridgePhase.nb4
     public static let automatedStatus = "Automated checkpoint"
     public static let physicalStatus = "Physical validation pending"
 }
@@ -82,6 +82,7 @@ public enum NearBridgeEventCategory: String, Codable, Sendable {
     case messageSend
     case messageReceive
     case timeout
+    case workflow
     case frameworkError
 }
 

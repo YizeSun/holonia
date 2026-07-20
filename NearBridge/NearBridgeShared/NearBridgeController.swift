@@ -19,6 +19,8 @@ public final class NearBridgeController: ObservableObject {
     @Published public private(set) var lastReceivedMessage: NearBridgeReliableMessage?
     @Published public private(set) var roundTripMilliseconds: Double?
     @Published public private(set) var pendingPingCount = 0
+    @Published public private(set) var contactWorkflowState: ContactWorkflowState = .idle
+    @Published public private(set) var contactWorkflowSummary: String?
 
     public let role: DeviceRole
     public let phase = NearBridgeBuild.phase
@@ -38,6 +40,10 @@ public final class NearBridgeController: ObservableObject {
     private var pendingPings: [UUID: Date] = [:]
     private var pendingAcknowledgements: Set<UUID> = []
     private var sequence = 0
+    private var contactWorkflow = ContactWorkflowStateMachine()
+    private var contactRequestMessage: NearBridgeReliableMessage?
+    private var capabilityResponseMessage: NearBridgeReliableMessage?
+    private var contactAcceptanceMessage: NearBridgeReliableMessage?
     private let logger = Logger(subsystem: "org.holonia.nearbridge.v0", category: "authenticated-session")
 
     public init(role: DeviceRole) {
@@ -144,6 +150,76 @@ public final class NearBridgeController: ObservableObject {
             schedulePingTimeout(ping)
         } catch {
             record(category: .messageSend, state: "signingFailed", error: error, detail: error.localizedDescription)
+        }
+    }
+
+    public func startContactRequest() {
+        guard contactWorkflow.state == .idle else { return }
+        do {
+            let context = try authenticatedContext()
+            let message = try ReliableMessageCodec.makeContactRequest(
+                sessionID: context.sessionID,
+                identityManager: context.identity
+            )
+            try contactWorkflow.apply(message, direction: .sent)
+            contactRequestMessage = message
+            publishContactWorkflow()
+            sendContactMessage(message, state: "requestSent")
+        } catch {
+            record(category: .workflow, state: "requestRejected", error: error, detail: error.localizedDescription)
+        }
+    }
+
+    public func sendCapabilityResponse() {
+        guard contactWorkflow.state == .requestReceived, let request = contactRequestMessage else { return }
+        do {
+            let context = try authenticatedContext()
+            let message = try ReliableMessageCodec.makeCapabilityResponse(
+                to: request,
+                sessionID: context.sessionID,
+                identityManager: context.identity
+            )
+            try contactWorkflow.apply(message, direction: .sent)
+            capabilityResponseMessage = message
+            publishContactWorkflow()
+            sendContactMessage(message, state: "capabilityResponseSent")
+        } catch {
+            record(category: .workflow, state: "responseRejected", error: error, detail: error.localizedDescription)
+        }
+    }
+
+    public func acceptContact() {
+        guard contactWorkflow.state == .responseReceived, let response = capabilityResponseMessage else { return }
+        do {
+            let context = try authenticatedContext()
+            let message = try ReliableMessageCodec.makeContactAccepted(
+                response: response,
+                sessionID: context.sessionID,
+                identityManager: context.identity
+            )
+            try contactWorkflow.apply(message, direction: .sent)
+            contactAcceptanceMessage = message
+            publishContactWorkflow()
+            sendContactMessage(message, state: "contactAccepted")
+        } catch {
+            record(category: .workflow, state: "acceptanceRejected", error: error, detail: error.localizedDescription)
+        }
+    }
+
+    public func completeContact() {
+        guard contactWorkflow.state == .acceptanceReceived, let acceptance = contactAcceptanceMessage else { return }
+        do {
+            let context = try authenticatedContext()
+            let message = try ReliableMessageCodec.makeContactCompleted(
+                acceptance: acceptance,
+                sessionID: context.sessionID,
+                identityManager: context.identity
+            )
+            try contactWorkflow.apply(message, direction: .sent)
+            publishContactWorkflow()
+            sendContactMessage(message, state: "completed")
+        } catch {
+            record(category: .workflow, state: "completionRejected", error: error, detail: error.localizedDescription)
         }
     }
 
@@ -352,7 +428,7 @@ public final class NearBridgeController: ObservableObject {
             return
         case .accepted(let accepted):
             lastReceivedMessage = accepted
-            record(category: .messageReceive, state: "accepted", peer: accepted.senderNodeID, message: accepted.messageID, detail: "Accepted signed \(accepted.messageType.rawValue) sequence \(accepted.payload.sequence)")
+            record(category: .messageReceive, state: "accepted", peer: accepted.senderNodeID, message: accepted.messageID, detail: "Accepted signed \(accepted.displaySummary)")
             try respond(to: accepted)
         }
     }
@@ -384,6 +460,12 @@ public final class NearBridgeController: ObservableObject {
             } else {
                 record(category: .messageReceive, state: "unexpectedAcknowledgement", peer: message.senderNodeID, message: message.messageID, detail: "Acknowledgement has no pending local message")
             }
+        case .contactRequest, .capabilityResponse, .contactAccepted, .contactCompleted:
+            try receiveContactMessage(message)
+            send(
+                try ReliableMessageCodec.makeAcknowledgement(for: message, sessionID: sessionID, identityManager: identityManager),
+                state: "acknowledged"
+            )
         }
     }
 
@@ -391,7 +473,7 @@ public final class NearBridgeController: ObservableObject {
         do {
             lastSentMessage = message
             transport?.send(try ReliableMessageCodec.encode(message))
-            record(category: .messageSend, state: state, peer: remoteHello?.nodeID, message: message.messageID, detail: "Sent signed \(message.messageType.rawValue) sequence \(message.payload.sequence)")
+            record(category: .messageSend, state: state, peer: remoteHello?.nodeID, message: message.messageID, detail: "Sent signed \(message.displaySummary)")
         } catch {
             record(category: .messageSend, state: "encodingFailed", peer: remoteHello?.nodeID, error: error, detail: error.localizedDescription)
         }
@@ -403,7 +485,7 @@ public final class NearBridgeController: ObservableObject {
             try? await Task.sleep(nanoseconds: 3_000_000_000)
             guard let self, self.pendingPings.removeValue(forKey: messageID) != nil else { return }
             self.pendingPingCount = self.pendingPings.count
-            self.record(category: .timeout, state: "timedOut", message: ping.messageID, detail: "No correlated signed pong within 3 seconds for sequence \(ping.payload.sequence)")
+            self.record(category: .timeout, state: "timedOut", message: ping.messageID, detail: "No correlated signed pong within 3 seconds for sequence \(ping.payload.sequence ?? -1)")
         }
     }
 
@@ -414,6 +496,43 @@ public final class NearBridgeController: ObservableObject {
             guard let self, self.pendingAcknowledgements.remove(messageID) != nil else { return }
             self.record(category: .timeout, state: "ackTimedOut", message: messageID, detail: "No signed acknowledgement within 3 seconds for message \(messageID.uuidString)")
         }
+    }
+
+    private func receiveContactMessage(_ message: NearBridgeReliableMessage) throws {
+        try contactWorkflow.apply(message, direction: .received)
+        switch message.messageType {
+        case .contactRequest:
+            contactRequestMessage = message
+        case .capabilityResponse:
+            capabilityResponseMessage = message
+        case .contactAccepted:
+            contactAcceptanceMessage = message
+        case .contactCompleted:
+            break
+        case .ping, .pong, .acknowledgement:
+            throw ContactWorkflowError.missingPayload
+        }
+        publishContactWorkflow()
+        record(category: .workflow, state: contactWorkflow.state.rawValue, peer: message.senderNodeID, message: message.messageID, detail: message.payload.contact?.summary ?? message.messageType.rawValue)
+    }
+
+    private func sendContactMessage(_ message: NearBridgeReliableMessage, state: String) {
+        pendingAcknowledgements.insert(message.messageID)
+        send(message, state: state)
+        scheduleAcknowledgementTimeout(message)
+        record(category: .workflow, state: contactWorkflow.state.rawValue, peer: remoteHello?.nodeID, message: message.messageID, detail: message.payload.contact?.summary ?? message.messageType.rawValue)
+    }
+
+    private func authenticatedContext() throws -> (identity: HostIdentityManager, sessionID: String) {
+        guard authenticatedSessionState == .authenticated, let identityManager, let activeSessionID else {
+            throw ReliableMessageError.wrongSession
+        }
+        return (identityManager, activeSessionID)
+    }
+
+    private func publishContactWorkflow() {
+        contactWorkflowState = contactWorkflow.state
+        contactWorkflowSummary = contactWorkflow.summary
     }
 
     private func publishPendingPairing() {
@@ -453,6 +572,12 @@ public final class NearBridgeController: ObservableObject {
         pendingPings.removeAll()
         pendingPingCount = 0
         pendingAcknowledgements.removeAll()
+        contactWorkflow.reset()
+        contactWorkflowState = .idle
+        contactWorkflowSummary = nil
+        contactRequestMessage = nil
+        capabilityResponseMessage = nil
+        contactAcceptanceMessage = nil
     }
 
     private func record(_ change: NearBridgeDiscoveryChange) {
