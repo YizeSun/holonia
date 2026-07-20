@@ -5,7 +5,7 @@ import SwiftUI
 struct NearBridgeIOSApp: App {
     var body: some Scene {
         WindowGroup {
-            NearBridgeExperimentView(role: .iPhone)
+            NearBridgeRootView(role: .iPhone)
         }
     }
 }

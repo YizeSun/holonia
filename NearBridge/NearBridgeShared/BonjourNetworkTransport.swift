@@ -6,9 +6,10 @@ final class BonjourNetworkTransport: ExperimentTransport {
     var onPeersChanged: (([ExperimentPeer]) -> Void)?
     var onMessage: ((ExperimentMessage, String?) -> Void)?
 
-    private static let serviceType = "_nearbridge-nb0._tcp"
-    private let queue = DispatchQueue(label: "org.holonia.nearbridge.nb0.bonjour")
+    private static let serviceType = "_nearbridge-v0._tcp"
+    private let queue = DispatchQueue(label: "org.holonia.nearbridge.v0.bonjour")
     private let serviceName: String
+    private let allowsSessions: Bool
     private var listener: NWListener?
     private var browser: NWBrowser?
     private var connection: NWConnection?
@@ -20,8 +21,9 @@ final class BonjourNetworkTransport: ExperimentTransport {
     private var intentionalDisconnect = false
     private var connectionIsReady = false
 
-    init(role: DeviceRole) {
-        serviceName = "NB0-\(role.rawValue)-\(UUID().uuidString.prefix(4))"
+    init(role: DeviceRole, allowsSessions: Bool = true) {
+        serviceName = "NearBridge-\(role.rawValue)-\(UUID().uuidString.prefix(4))"
+        self.allowsSessions = allowsSessions
     }
 
     func start() {
@@ -54,12 +56,17 @@ final class BonjourNetworkTransport: ExperimentTransport {
             listener.stateUpdateHandler = { [weak self] state in self?.handleListener(state) }
             listener.newConnectionHandler = { [weak self] connection in
                 guard let self else { return }
+                guard self.allowsSessions else {
+                    self.emit(.invitation, "rejectedByPhase", peer: String(describing: connection.endpoint), detail: "NB-1 discovery rejects all inbound sessions")
+                    connection.cancel()
+                    return
+                }
                 if self.connectionIsReady {
                     self.emit(.connection, "duplicateRejected", peer: String(describing: connection.endpoint), detail: "Rejected an additional inbound TCP connection while one session is active")
                     connection.cancel()
                     return
                 }
-                self.emit(.invitation, "received", peer: String(describing: connection.endpoint), detail: "Accepted inbound experimental TCP session")
+                self.emit(.invitation, "received", peer: String(describing: connection.endpoint), detail: "Accepted inbound untrusted TCP session")
                 self.install(connection, reconnectEndpoint: nil)
             }
             self.listener = listener
@@ -94,6 +101,10 @@ final class BonjourNetworkTransport: ExperimentTransport {
     }
 
     private func connectOnQueue(to peerID: String) {
+        guard allowsSessions else {
+            emit(.connection, "rejectedByPhase", peer: peerID, detail: "NB-1 discovery cannot create sessions")
+            return
+        }
         guard !connectionIsReady else {
             emit(.connection, "alreadyConnected", peer: peerID, detail: "Ignored Connect because an active TCP session already exists")
             return
@@ -118,6 +129,10 @@ final class BonjourNetworkTransport: ExperimentTransport {
     }
 
     private func sendOnQueue(_ data: Data) {
+        guard allowsSessions else {
+            emit(.messageSend, "rejectedByPhase", detail: "NB-1 discovery cannot send session messages")
+            return
+        }
         guard let connection, connectionIsReady else {
             emit(.frameworkError, "sessionNotReady", detail: "No ready TCP session is available for sending")
             return
@@ -179,7 +194,7 @@ final class BonjourNetworkTransport: ExperimentTransport {
     private func handleListener(_ state: NWListener.State) {
         switch state {
         case .ready:
-            emit(.advertisement, DiscoveryState.advertising.rawValue, detail: "Advertising \(serviceName) with minimal Bonjour metadata")
+            emit(.advertisement, DiscoveryState.advertising.rawValue, detail: "Advertising \(serviceName) with minimal discovery metadata")
         case .waiting(let error):
             emit(.localNetworkPermission, "waiting", detail: "Listener is waiting; Local Network permission or network availability may be involved", error: error)
         case .failed(let error):

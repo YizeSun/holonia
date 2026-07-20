@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>NearBridge NB-0 Mac</string>
+	<string>NearBridge NB-1 Mac</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -22,11 +22,9 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSBonjourServices</key>
 	<array>
-		<string>_nearbridge-nb0._tcp</string>
-		<string>_nb0-bridge._tcp</string>
-		<string>_nb0-bridge._udp</string>
+		<string>_nearbridge-v0._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>NB-0 discovers another user-launched NearBridge experiment and exchanges non-sensitive ping/pong diagnostics on the local network.</string>
+	<string>NearBridge discovers user-launched Apple devices on the local network. Discovery does not establish trust or identity.</string>
 </dict>
 </plist>
