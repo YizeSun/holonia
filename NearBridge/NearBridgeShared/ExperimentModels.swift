@@ -9,7 +9,7 @@ public enum ExperimentKind: String, Codable, CaseIterable, Identifiable, Sendabl
     public var supportsSessions: Bool { self != .udpMulticastProbe }
 }
 
-public enum DeviceRole: String, Codable, Sendable {
+public enum DeviceRole: String, Codable, Equatable, Sendable {
     case iPhone
     case mac
 }

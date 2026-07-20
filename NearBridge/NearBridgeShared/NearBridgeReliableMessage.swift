@@ -8,20 +8,32 @@ public enum ReliableMessageType: String, Codable, Sendable {
     case capabilityResponse
     case contactAccepted
     case contactCompleted
+    case capabilityInvocation
+    case capabilityResult
+    case capabilityFailure
 }
 
 public struct ReliableMessagePayload: Codable, Equatable, Sendable {
     public let sequence: Int?
     public let contact: ContactWorkflowPayload?
+    public let capability: CapabilityMessagePayload?
 
     public init(sequence: Int) {
         self.sequence = sequence
         contact = nil
+        capability = nil
     }
 
     public init(contact: ContactWorkflowPayload) {
         sequence = nil
         self.contact = contact
+        capability = nil
+    }
+
+    public init(capability: CapabilityMessagePayload) {
+        sequence = nil
+        contact = nil
+        self.capability = capability
     }
 }
 
@@ -49,6 +61,9 @@ public struct NearBridgeReliableMessage: Codable, Equatable, Identifiable, Senda
         }
         if let contact = payload.contact {
             return "\(messageType.rawValue) · \(contact.summary)"
+        }
+        if let capability = payload.capability {
+            return "\(messageType.rawValue) · \(capability.capabilityID)"
         }
         return messageType.rawValue
     }
@@ -196,7 +211,7 @@ public enum ReliableMessageCodec {
 
     public static func makeContactRequest(
         requestID: UUID = UUID(),
-        capabilityID: String = ContactDemoCapability.codeProblemAnalysis,
+        capabilityID: String = ContactDemoCapability.defaultCapabilityID,
         summary: String = ContactDemoCapability.requestSummary,
         sessionID: String,
         identityManager: HostIdentityManager,
@@ -313,6 +328,95 @@ public enum ReliableMessageCodec {
         )
     }
 
+    public static func makeCapabilityInvocation(
+        input: String,
+        capabilityID: String = ContactDemoCapability.textSummarization,
+        invocationID: UUID = UUID(),
+        sessionID: String,
+        identityManager: HostIdentityManager,
+        nowMilliseconds: Int64 = currentMilliseconds(),
+        lifetimeMilliseconds: Int64 = 30_000,
+        messageID: UUID = UUID()
+    ) throws -> NearBridgeReliableMessage {
+        try sign(
+            messageID: messageID,
+            senderNodeID: identityManager.identity.nodeID,
+            sessionID: sessionID,
+            messageType: .capabilityInvocation,
+            sentAtMilliseconds: nowMilliseconds,
+            expiresAtMilliseconds: nowMilliseconds + lifetimeMilliseconds,
+            correlationID: messageID,
+            payload: .init(capability: .init(
+                invocationID: invocationID,
+                capabilityID: capabilityID,
+                inputText: input,
+                outputText: nil,
+                status: .requested
+            )),
+            identityManager: identityManager
+        )
+    }
+
+    public static func makeCapabilityResult(
+        for invocation: NearBridgeReliableMessage,
+        output: String,
+        sessionID: String,
+        identityManager: HostIdentityManager,
+        nowMilliseconds: Int64 = currentMilliseconds(),
+        lifetimeMilliseconds: Int64 = 30_000,
+        messageID: UUID = UUID()
+    ) throws -> NearBridgeReliableMessage {
+        guard invocation.messageType == .capabilityInvocation,
+              let request = invocation.payload.capability else { throw CapabilityError.invalidMessage }
+        return try sign(
+            messageID: messageID,
+            senderNodeID: identityManager.identity.nodeID,
+            sessionID: sessionID,
+            messageType: .capabilityResult,
+            sentAtMilliseconds: nowMilliseconds,
+            expiresAtMilliseconds: nowMilliseconds + lifetimeMilliseconds,
+            correlationID: invocation.messageID,
+            payload: .init(capability: .init(
+                invocationID: request.invocationID,
+                capabilityID: request.capabilityID,
+                inputText: nil,
+                outputText: output,
+                status: .succeeded
+            )),
+            identityManager: identityManager
+        )
+    }
+
+    public static func makeCapabilityFailure(
+        for invocation: NearBridgeReliableMessage,
+        reason: String,
+        sessionID: String,
+        identityManager: HostIdentityManager,
+        nowMilliseconds: Int64 = currentMilliseconds(),
+        lifetimeMilliseconds: Int64 = 30_000,
+        messageID: UUID = UUID()
+    ) throws -> NearBridgeReliableMessage {
+        guard invocation.messageType == .capabilityInvocation,
+              let request = invocation.payload.capability else { throw CapabilityError.invalidMessage }
+        return try sign(
+            messageID: messageID,
+            senderNodeID: identityManager.identity.nodeID,
+            sessionID: sessionID,
+            messageType: .capabilityFailure,
+            sentAtMilliseconds: nowMilliseconds,
+            expiresAtMilliseconds: nowMilliseconds + lifetimeMilliseconds,
+            correlationID: invocation.messageID,
+            payload: .init(capability: .init(
+                invocationID: request.invocationID,
+                capabilityID: request.capabilityID,
+                inputText: nil,
+                outputText: String(reason.prefix(280)),
+                status: .failed
+            )),
+            identityManager: identityManager
+        )
+    }
+
     public static func encode(_ message: NearBridgeReliableMessage) throws -> Data {
         try validateStructure(message)
         return try canonicalData(message)
@@ -396,21 +500,56 @@ public enum ReliableMessageCodec {
         case .ping:
             guard message.correlationID == message.messageID,
                   message.payload.sequence != nil,
-                  message.payload.contact == nil else { throw ReliableMessageError.invalidCorrelation }
+                  message.payload.contact == nil,
+                  message.payload.capability == nil else { throw ReliableMessageError.invalidCorrelation }
         case .pong:
             guard message.payload.sequence != nil,
-                  message.payload.contact == nil else { throw ReliableMessageError.invalidCorrelation }
+                  message.payload.contact == nil,
+                  message.payload.capability == nil else { throw ReliableMessageError.invalidCorrelation }
         case .contactRequest:
             guard message.correlationID == message.messageID,
                   message.payload.sequence == nil,
-                  message.payload.contact != nil else { throw ReliableMessageError.invalidCorrelation }
+                  message.payload.contact != nil,
+                  message.payload.capability == nil else { throw ReliableMessageError.invalidCorrelation }
         case .capabilityResponse, .contactAccepted, .contactCompleted:
             guard message.payload.sequence == nil,
-                  message.payload.contact != nil else { throw ReliableMessageError.invalidCorrelation }
+                  message.payload.contact != nil,
+                  message.payload.capability == nil else { throw ReliableMessageError.invalidCorrelation }
+        case .capabilityInvocation:
+            guard message.correlationID == message.messageID,
+                  message.payload.sequence == nil,
+                  message.payload.contact == nil,
+                  let capability = message.payload.capability,
+                  capability.status == .requested,
+                  capability.outputText == nil,
+                  let input = capability.inputText,
+                  !input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                  input.count <= 1_200 else { throw ReliableMessageError.invalidCorrelation }
+        case .capabilityResult:
+            guard message.payload.sequence == nil,
+                  message.payload.contact == nil,
+                  let capability = message.payload.capability,
+                  capability.status == .succeeded,
+                  capability.inputText == nil,
+                  let output = capability.outputText,
+                  !output.isEmpty,
+                  output.count <= 280 else { throw ReliableMessageError.invalidCorrelation }
+        case .capabilityFailure:
+            guard message.payload.sequence == nil,
+                  message.payload.contact == nil,
+                  let capability = message.payload.capability,
+                  capability.status == .failed,
+                  capability.inputText == nil,
+                  let output = capability.outputText,
+                  !output.isEmpty,
+                  output.count <= 280 else { throw ReliableMessageError.invalidCorrelation }
         case .acknowledgement:
             let hasSequence = message.payload.sequence != nil
             let hasContact = message.payload.contact != nil
-            guard hasSequence != hasContact else { throw ReliableMessageError.invalidCorrelation }
+            let hasCapability = message.payload.capability != nil
+            guard [hasSequence, hasContact, hasCapability].filter({ $0 }).count == 1 else {
+                throw ReliableMessageError.invalidCorrelation
+            }
         }
     }
 

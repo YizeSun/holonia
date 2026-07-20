@@ -16,7 +16,8 @@ NearBridge 第一阶段只回答一个问题：
 - `NB-2` 已完成实现与自动化验证：Host Keychain 稳定密钥、签名配对 transcript、双端验证码确认、本地可信记录与撤销；真机配对和重启持久性待验证。
 - `NB-3` 已完成实现与自动化验证：paired-key sender authentication、fresh-session binding、签名完整性、过期、去重、ping/pong/ack 相关性与清晰状态；真机交换待验证。
 - `NB-4` 已完成实现与自动化验证：Request → Capability Response → Contact Accepted → Completed 的签名联系状态机；不调用 Agent 或远程操作。
-- 当前主线位于 `NB-4 → NB-5` 的边界。
+- `NB-5` 已完成实现与自动化验证：iPhone 可在完成联系流程后调用 Mac Host 明确注册的 deterministic text-summary Agent，并接收签名 typed result；没有任意命令、文件、云或动态工具入口。
+- `NB-1 → NB-5` 已达到 code/automated feature-complete checkpoint；每一阶段的真机验收和延期环境矩阵仍待执行，所以尚不能称为稳定或生产就绪。
 - 每个 `NB` 都使用独立 Git commit 和远端 checkpoint；自动化、模拟器与真机证据分别记录，后续修复添加新 commit，不改写已测试 checkpoint。
 - 不阻塞主线的权限、生命周期、网络环境和候选技术补测记录在 [`nearbridge/deferred-validation-todo.md`](nearbridge/deferred-validation-todo.md)。
 
@@ -138,6 +139,8 @@ Request：Completed
 ```
 
 该能力必须是明确注册的接口，不开放任意命令执行。
+
+当前 checkpoint 的 Host allowlist、Agent 示例、安全边界和验证证据见 [`nearbridge/nb5-results.md`](nearbridge/nb5-results.md)。
 
 ### NB-5 完成后的含义
 

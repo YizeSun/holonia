@@ -2,8 +2,10 @@ import Foundation
 
 public enum ContactDemoCapability {
     public static let codeProblemAnalysis = "holonia.contact.code-analysis.v1"
-    public static let requestSummary = "Find a local capability that can discuss a small code problem"
-    public static let responseSummary = "A local code-analysis contact is available; no Agent has been invoked"
+    public static let textSummarization = "holonia.capability.text-summary.extractive.v1"
+    public static let defaultCapabilityID = textSummarization
+    public static let requestSummary = "Find the explicitly registered local text-summary capability"
+    public static let responseSummary = "The Host offers a narrow local summary Agent; it has not been invoked yet"
 }
 
 public struct ContactWorkflowPayload: Codable, Equatable, Sendable {
@@ -130,7 +132,7 @@ public struct ContactWorkflowStateMachine: Equatable, Sendable {
             summary = payload.summary
             state = .completed
 
-        case .ping, .pong, .acknowledgement:
+        case .ping, .pong, .acknowledgement, .capabilityInvocation, .capabilityResult, .capabilityFailure:
             throw ContactWorkflowError.missingPayload
         }
     }

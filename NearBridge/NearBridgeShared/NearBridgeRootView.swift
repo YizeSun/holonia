@@ -3,6 +3,7 @@ import SwiftUI
 
 public struct NearBridgeRootView: View {
     @StateObject private var controller: NearBridgeController
+    @State private var capabilityInput = "NearBridge lets an iPhone discover and pair with a Mac. The Mac Host exposes only registered capabilities. Signed messages preserve sender, session, expiry, and integrity."
     @Environment(\.scenePhase) private var scenePhase
 
     public init(role: DeviceRole) {
@@ -13,9 +14,9 @@ public struct NearBridgeRootView: View {
         NavigationStack {
             List {
                 Section {
-                    Label("Contact request vertical slice", systemImage: "person.2.wave.2")
+                    Label("Narrow local capability", systemImage: "cpu")
                         .foregroundStyle(.orange)
-                    Text("NB-4 demonstrates Request → Capability Response → Contact Accepted → Completed. It does not invoke an Agent.")
+                    Text("NB-5 lets the iPhone invoke one Host-registered text-summary Agent. No command, file, cloud, or dynamic tool access exists.")
                         .font(.caption)
                 }
 
@@ -133,7 +134,7 @@ public struct NearBridgeRootView: View {
                     }
                     switch controller.contactWorkflowState {
                     case .idle:
-                        Button("Request code-analysis contact") { controller.startContactRequest() }
+                        Button("Request text-summary contact") { controller.startContactRequest() }
                             .buttonStyle(.borderedProminent)
                             .disabled(controller.authenticatedSessionState != .authenticated)
                     case .requestReceived:
@@ -154,6 +155,50 @@ public struct NearBridgeRootView: View {
                             .foregroundStyle(.secondary)
                     }
                     Text("This demo exchanges signed workflow messages only. No repository, model, tool, or remote command is accessed.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Section("NB-5 Agent demo") {
+                    if controller.registeredCapabilities.isEmpty {
+                        Text("This device registers no executable capability.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(controller.registeredCapabilities) { capability in
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(capability.displayName).bold()
+                                Text(capability.capabilityID).font(.caption2).textSelection(.enabled)
+                                Text(capability.executorLabel).font(.caption).foregroundStyle(.secondary)
+                                Text("Host allowlist · input ≤ \(capability.maximumInputCharacters) · output ≤ \(capability.maximumOutputCharacters)")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    if controller.role == .iPhone {
+                        TextEditor(text: $capabilityInput)
+                            .frame(minHeight: 100)
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(.secondary.opacity(0.3)))
+                        Text("\(capabilityInput.count) / 1200 characters")
+                            .font(.caption2)
+                            .foregroundStyle(capabilityInput.count > 1_200 ? .red : .secondary)
+                        Button("Invoke registered Mac summarizer") {
+                            controller.invokeTextSummary(input: capabilityInput)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(
+                            controller.authenticatedSessionState != .authenticated ||
+                            controller.contactWorkflowState != .completed ||
+                            capabilityInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                            capabilityInput.count > 1_200
+                        )
+                    }
+                    LabeledContent("Execution", value: controller.capabilityExecutionState.rawValue)
+                    if let output = controller.lastCapabilityOutput {
+                        Text(output).textSelection(.enabled)
+                    }
+                    Text("Agent role: receive a typed task after Host policy checks, run one local handler, return a signed typed result. The demo handler is deterministic, not an LLM.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
