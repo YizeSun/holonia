@@ -15,7 +15,8 @@
 
 1. Mac 按 `Shift-Command-5`，选择只录 NearBridge App 所在区域，麦克风选择“无”，开始录制。
 2. iPhone 打开控制中心，长按录屏按钮，确认麦克风关闭，开始录制。
-3. 等待三秒再操作。Mac 比 iPhone 先开始、多录几秒是正确的。
+3. 两端都进入 Demo 后保持静止五秒再操作。这段干净画面会放在 Holonia 与 NearBridge 关系介绍下方。
+4. Mac 比 iPhone 先开始、多录几秒是正确的。
 
 ## 一次完成的点击顺序
 

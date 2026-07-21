@@ -1,19 +1,27 @@
-The strongest model available to you may not fit on the phone in your hand. But exposing a personal Mac as a generic remote-execution server would be unsafe. NearBridge takes a narrower path.
+Every person or Agent eventually reaches a task beyond its current capability. Holonia asks how that request can find the right capability and return a result that can be verified.
 
-It is a native iPhone and Mac experiment for reaching one explicitly selected capability on a nearby computer. Both apps are user-launched. They advertise locally, but a discovered device remains untrusted.
+Holonia is a capability discovery and work-connection network for people, Agents, and organizations: request, trusted contact, delegation, delivery, and acceptance.
 
-The user compares the same six-digit code and approves it on both sides. NearBridge binds a fresh authenticated session to the paired keys. Discovery never becomes authentication by itself.
+But connection must not surrender control. In Holonia, the Holon proposes, the Host enforces, and the human authorizes.
 
-The iPhone requests contact with the Mac’s Primary Holon. The signed workflow confirms one registered inert-text capability. The Mac Host—not the remote question—chooses which adapter can execute it.
+NearBridge is Holonia’s first working implementation: a trusted local edge between an iPhone, a Mac, and Host-controlled capabilities.
 
-I ask one ordinary, non-sensitive question. It is signed, expiring, session-correlated, and input-bounded.
+Today it provides untrusted discovery, approved device identity, fresh signed sessions, contact workflows, versioned capability contracts, isolated execution, and signed receipts.
 
-The Mac routes it to the selected OpenAI GPT-5.6 Sol model-only adapter. The separate app-sandboxed XPC request uses the Responses API with store false, omits tools, and has no file, shell, workspace, Git, or device control.
+These contracts can later admit signed third-party adapters, controlled context, and approved tools, while Holonia expands to private sessions and specialized networks.
 
-The Mac signs the typed result. The iPhone validates sender, session, expiry, signature, and correlation. Only then does it display the answer. Both sides retain the same execution receipt.
+Both apps are user-launched on the same local network. They discover each other but remain untrusted. Discovery is not authentication.
 
-The receipt records provider, capability, outcome, acknowledgement, integrity, and latency. Sanitized diagnostics omit prompt and answer bodies and redact credential-shaped values.
+The user compares the same six-digit code and approves both sides. NearBridge binds the paired keys to a fresh authenticated session.
 
-This is a bounded personal-AI bridge—not arbitrary remote execution, payload encryption, or a production-readiness claim.
+The iPhone requests the Mac’s Primary Holon capability. A signed contact workflow confirms what is available, while the Mac Host—not the remote request—selects the adapter.
 
-Codex turned the security brief into incremental checkpoints, native flows, isolated runners, and fifty-four tests. NearBridge lets your phone reach a stronger nearby model while the Host keeps control and audit.
+I ask one ordinary, non-sensitive question. It is signed, expiring, correlated to this session, and bounded before execution.
+
+The Mac routes it to the selected GPT-5.6 model-only adapter inside a separate app-sandboxed XPC service. It has no files, shell, workspace, Git, device control, or dynamic tools.
+
+The Mac signs the typed answer. The iPhone verifies sender, session, expiry, signature, and correlation before displaying it.
+
+Both sides retain the same execution receipt. Sanitized diagnostics omit prompt, answer, and credential data.
+
+Codex helped turn this safety model into nine incremental checkpoints, native interfaces, isolated runners, diagnostics, and fifty-four tests. NearBridge is the first working edge of Holonia.

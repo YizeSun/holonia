@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <rect width="1920" height="1080" fill="#0B0F14"/>
+  <text x="120" y="128" fill="#FF8A24" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="27" font-weight="600" letter-spacing="4">NEARBRIDGE · HOLONIA’S FIRST WORKING EDGE</text>
+  <text x="120" y="204" fill="#F5F7FA" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="58" font-weight="700">A trusted local capability path — built first</text>
+  <g font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial">
+    <text x="120" y="306" fill="#FF9A43" font-size="25" font-weight="700" letter-spacing="3">NOW · IMPLEMENTED</text>
+    <g font-size="25" font-weight="600" text-anchor="middle">
+      <g transform="translate(120 344)"><rect width="250" height="112" rx="26" fill="#151B23" stroke="#FF8A24" stroke-width="3"/><text x="125" y="51" fill="#F5F7FA">Untrusted</text><text x="125" y="82" fill="#F5F7FA">discovery</text></g>
+      <g transform="translate(402 344)"><rect width="250" height="112" rx="26" fill="#151B23" stroke="#FF8A24" stroke-width="3"/><text x="125" y="51" fill="#F5F7FA">Approved</text><text x="125" y="82" fill="#F5F7FA">identity</text></g>
+      <g transform="translate(684 344)"><rect width="250" height="112" rx="26" fill="#151B23" stroke="#FF8A24" stroke-width="3"/><text x="125" y="51" fill="#F5F7FA">Signed fresh</text><text x="125" y="82" fill="#F5F7FA">sessions</text></g>
+      <g transform="translate(966 344)"><rect width="250" height="112" rx="26" fill="#151B23" stroke="#FF8A24" stroke-width="3"/><text x="125" y="51" fill="#F5F7FA">Contact</text><text x="125" y="82" fill="#F5F7FA">workflow</text></g>
+      <g transform="translate(1248 344)"><rect width="250" height="112" rx="26" fill="#151B23" stroke="#FF8A24" stroke-width="3"/><text x="125" y="51" fill="#F5F7FA">Capability</text><text x="125" y="82" fill="#F5F7FA">contracts</text></g>
+      <g transform="translate(1530 344)"><rect width="250" height="112" rx="26" fill="#151B23" stroke="#FF8A24" stroke-width="3"/><text x="125" y="51" fill="#F5F7FA">Execution</text><text x="125" y="82" fill="#F5F7FA">receipts</text></g>
+    </g>
+    <text x="120" y="584" fill="#D9DFE6" font-size="25" font-weight="700" letter-spacing="3">NEXT · EXTEND THE HOST BOUNDARY</text>
+    <g font-size="27" font-weight="600">
+      <rect x="120" y="624" width="500" height="88" rx="24" fill="#151B23" stroke="#485565" stroke-width="2"/><text x="154" y="678" fill="#F5F7FA">Signed third-party adapters</text>
+      <rect x="660" y="624" width="500" height="88" rx="24" fill="#151B23" stroke="#485565" stroke-width="2"/><text x="694" y="678" fill="#F5F7FA">Controlled read-only context</text>
+      <rect x="1200" y="624" width="580" height="88" rx="24" fill="#151B23" stroke="#485565" stroke-width="2"/><text x="1234" y="678" fill="#F5F7FA">Explicitly approved tools</text>
+    </g>
+    <text x="120" y="838" fill="#8995A3" font-size="25" font-weight="700" letter-spacing="3">LATER · BROADER HOLONIA</text>
+    <text x="120" y="896" fill="#C8D0D9" font-size="31">Primary Holon identity · private sessions · capability propagation · specialized networks</text>
+  </g>
+</svg>

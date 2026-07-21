@@ -6,11 +6,11 @@ Replace only the bracketed fields before submission.
 
 ### Title
 
-NearBridge — Ask a Stronger Mac Model from Your iPhone | OpenAI Build Week
+NearBridge — The First Working Edge of Holonia | OpenAI Build Week
 
 ### Description
 
-NearBridge is a native iPhone + Mac experiment built with Codex and GPT-5.6 for OpenAI Build Week.
+Holonia is a capability discovery and work-connection network for people, Agents, and organizations. NearBridge is its first working implementation slice: a native iPhone + Mac experiment built with Codex and GPT-5.6 for OpenAI Build Week.
 
 An iPhone discovers a user-launched Mac on the same local network, explicitly pairs with it, establishes a fresh authenticated session, and invokes one Mac-selected inert-text Primary Holon capability. The Mac calls a bounded GPT-5.6 model-only adapter and returns a signed, correlated result that the iPhone validates and displays.
 
@@ -39,11 +39,11 @@ This is an experimental Build Week checkpoint, not a production-security or payl
 
 ## Devpost short description
 
-NearBridge lets an iPhone explicitly discover, authenticate, and ask a stronger model selected by a nearby Mac, then receive a signed and auditable answer without granting files, shell, workspace, or dynamic tools.
+NearBridge is the first working edge of Holonia: it lets an iPhone explicitly discover, authenticate, and ask a stronger model selected by a nearby Mac, then receive a signed and auditable answer without granting files, shell, workspace, or dynamic tools.
 
 ## Devpost inspiration
 
-The phone in a person’s hand is not always the best place to run the strongest available model. At the same time, turning a personal Mac into a generic remote-execution server would create unacceptable risk. We wanted a local bridge where discovery stays untrusted, people approve identity on both devices, and the Host—not a remote prompt—controls exactly what capability can run.
+Holonia begins with a broader question: when a person or Agent lacks a capability, how can a request find the right Holon, establish trusted contact, delegate work, and receive a verifiable result? The phone in a person’s hand is not always the best place to run the strongest available model. At the same time, turning a personal Mac into a generic remote-execution server would create unacceptable risk. We started with NearBridge: a local foundation where discovery stays untrusted, people approve identity on both devices, and the Host—not a remote prompt—controls exactly what capability can run.
 
 ## Devpost what it does
 

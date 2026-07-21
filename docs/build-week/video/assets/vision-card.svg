@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <rect width="1920" height="1080" fill="#0B0F14"/>
+  <text x="140" y="152" fill="#FF8A24" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="28" font-weight="600" letter-spacing="4">HOLONIA VISION</text>
+  <text x="140" y="238" fill="#F5F7FA" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="65" font-weight="700">Capability discovery &amp; work connection</text>
+  <g font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" transform="translate(95 398)">
+    <g><rect width="285" height="178" rx="30" fill="#151B23" stroke="#334050" stroke-width="3"/><text x="142" y="82" text-anchor="middle" fill="#F5F7FA" font-size="35" font-weight="650">Request</text><text x="142" y="128" text-anchor="middle" fill="#9DA8B5" font-size="23">capability is missing</text></g>
+    <g transform="translate(360)"><rect width="285" height="178" rx="30" fill="#151B23" stroke="#FF8A24" stroke-width="3"/><text x="142" y="72" text-anchor="middle" fill="#F5F7FA" font-size="33" font-weight="650">Trusted</text><text x="142" y="113" text-anchor="middle" fill="#F5F7FA" font-size="33" font-weight="650">contact</text><text x="142" y="149" text-anchor="middle" fill="#FFAC62" font-size="21">find the right Holon</text></g>
+    <g transform="translate(720)"><rect width="285" height="178" rx="30" fill="#151B23" stroke="#334050" stroke-width="3"/><text x="142" y="82" text-anchor="middle" fill="#F5F7FA" font-size="35" font-weight="650">Delegate</text><text x="142" y="128" text-anchor="middle" fill="#9DA8B5" font-size="23">bounded authority</text></g>
+    <g transform="translate(1080)"><rect width="285" height="178" rx="30" fill="#151B23" stroke="#334050" stroke-width="3"/><text x="142" y="82" text-anchor="middle" fill="#F5F7FA" font-size="35" font-weight="650">Delivery</text><text x="142" y="128" text-anchor="middle" fill="#9DA8B5" font-size="23">typed result</text></g>
+    <g transform="translate(1440)"><rect width="285" height="178" rx="30" fill="#151B23" stroke="#FF8A24" stroke-width="3"/><text x="142" y="82" text-anchor="middle" fill="#F5F7FA" font-size="35" font-weight="650">Acceptance</text><text x="142" y="128" text-anchor="middle" fill="#FFAC62" font-size="23">verify the outcome</text></g>
+    <g stroke="#657383" stroke-width="4" fill="#657383"><path d="M302 89 H343"/><path d="M343 89 l-14 -9 v18 z"/><path d="M662 89 H703"/><path d="M703 89 l-14 -9 v18 z"/><path d="M1022 89 H1063"/><path d="M1063 89 l-14 -9 v18 z"/><path d="M1382 89 H1423"/><path d="M1423 89 l-14 -9 v18 z"/></g>
+  </g>
+  <text x="960" y="748" text-anchor="middle" fill="#DCE2E8" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="34" font-weight="600">People · Agents · Organizations</text>
+  <text x="960" y="818" text-anchor="middle" fill="#8E99A6" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="27">One shared semantic path; different trust and transport mechanisms.</text>
+</svg>
