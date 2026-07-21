@@ -2,6 +2,8 @@
 
 这份清单只负责录制干净的 Mac 与 iPhone 原片。不要边操作边念旁白，也不要提前裁剪或转码；画面锁定后再生成旁白、字幕和最终左右分屏成片。
 
+需要按时间操作时，直接使用配套的 [`原片录制秒表`](recording-cue-sheet-zh.md)。最终成片时间线和原片录制秒表不是同一条时间线。
+
 ## 录制前
 
 1. 确认 Xcode 运行的是 tag `nearbridge-build-week-p0-p1` 对应的最终 NB-9 Build Week 版本。
