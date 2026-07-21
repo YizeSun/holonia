@@ -1,6 +1,6 @@
 # NearBridge YouTube and Devpost Copy
 
-Replace only the bracketed fields before submission.
+Final copy for the published video and Devpost entry. The Codex Session ID is intentionally supplied directly to Devpost after `/feedback` and is not committed here.
 
 ## YouTube
 
@@ -85,7 +85,7 @@ Swift, SwiftUI, Network.framework, Bonjour, CryptoKit, Security/Keychain, XPC, O
 ## Required links
 
 - Repository: https://github.com/YizeSun/holonia
-- Public YouTube demo: `[VIDEO_URL]`
-- Codex `/feedback` Session ID: `[CODEX_SESSION_ID]`
+- Public YouTube demo: https://youtu.be/4s-6gypJUYA
+- Codex `/feedback` Session ID: use the receipt returned after sharing the primary build session through the in-app `/feedback` dialog.
 
 Before submitting, verify that the GitHub repository is public or shared with the required judging accounts, and that the YouTube link opens in a private browser window without login.

@@ -2,6 +2,18 @@
 
 This package is the source of truth for the final OpenAI Build Week video. The target runtime is **2:50**, leaving ten seconds of safety below the three-minute limit.
 
+## Editable cut
+
+The working Remotion edit lives in [`remotion/`](remotion/). It contains the
+locked 2:50 composition, tracked story cards, captions, evidence stills, and
+render commands. Raw recordings, generated narration, and rendered MP4 files
+stay local and are ignored by Git.
+
+For the supplied takes, the Mac recording is longer. The edit preserves the
+shared ending and removes 361 frames at 30 fps (approximately 12.03 seconds)
+from the **beginning of the Mac recording only**. This is the synchronization
+rule for this cut.
+
 ## Story in one sentence
 
 Holonia helps people and Agents reach capabilities beyond themselves; NearBridge is its first working implementation slice, proving that an iPhone can explicitly trust a nearby Mac, invoke one Host-controlled GPT-5.6 capability, and receive a signed, auditable result without exposing files, shell, workspace, or dynamic tools.

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#080B10"/><stop offset="1" stop-color="#101823"/></linearGradient>
+    <radialGradient id="glow" cx="0.76" cy="0.42" r="0.5"><stop offset="0" stop-color="#FF8A24" stop-opacity="0.17"/><stop offset="1" stop-color="#FF8A24" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/><rect width="1920" height="1080" fill="url(#glow)"/>
+  <g fill="none" stroke-linecap="round">
+    <path d="M1292 367 C1390 367 1403 468 1500 468 S1612 574 1710 574" stroke="#FF8A24" stroke-width="6" opacity="0.9"/>
+    <circle cx="1250" cy="367" r="39" fill="#151D28" stroke="#FF8A24" stroke-width="5"/>
+    <circle cx="1500" cy="468" r="49" fill="#151D28" stroke="#F2F5F7" stroke-width="5"/>
+    <circle cx="1752" cy="574" r="39" fill="#151D28" stroke="#FF8A24" stroke-width="5"/>
+  </g>
+  <text x="156" y="303" fill="#FF8A24" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="29" font-weight="600" letter-spacing="5">OPENAI BUILD WEEK · HOLONIA</text>
+  <text x="150" y="458" fill="#F5F7FA" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="110" font-weight="720">When capability</text>
+  <text x="150" y="580" fill="#F5F7FA" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="110" font-weight="720">is not enough.</text>
+  <text x="158" y="680" fill="#AAB3BE" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="37">Find the right Holon · establish trust · receive a verifiable result</text>
+  <rect x="158" y="748" width="1035" height="2" fill="#34404E"/>
+  <text x="158" y="821" fill="#FF9A43" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="31" font-weight="600">NearBridge is the first working edge.</text>
+</svg>

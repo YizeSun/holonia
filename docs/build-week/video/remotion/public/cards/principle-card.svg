@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <rect width="1920" height="1080" fill="#0B0F14"/>
+  <text x="960" y="184" text-anchor="middle" fill="#FF8A24" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="28" font-weight="600" letter-spacing="4">HOLONIA CONTROL MODEL</text>
+  <g font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial">
+    <g transform="translate(120 350)"><rect width="500" height="300" rx="42" fill="#151B23" stroke="#334050" stroke-width="3"/><text x="250" y="105" text-anchor="middle" fill="#F5F7FA" font-size="49" font-weight="700">Holon</text><text x="250" y="178" text-anchor="middle" fill="#FF9A43" font-size="39" font-weight="650">proposes</text><text x="250" y="236" text-anchor="middle" fill="#8F9AA7" font-size="25">understands &amp; recommends</text></g>
+    <g transform="translate(710 350)"><rect width="500" height="300" rx="42" fill="#151B23" stroke="#FF8A24" stroke-width="4"/><text x="250" y="105" text-anchor="middle" fill="#F5F7FA" font-size="49" font-weight="700">Host</text><text x="250" y="178" text-anchor="middle" fill="#FF9A43" font-size="39" font-weight="650">enforces</text><text x="250" y="236" text-anchor="middle" fill="#8F9AA7" font-size="25">keys · policy · access · audit</text></g>
+    <g transform="translate(1300 350)"><rect width="500" height="300" rx="42" fill="#151B23" stroke="#334050" stroke-width="3"/><text x="250" y="105" text-anchor="middle" fill="#F5F7FA" font-size="49" font-weight="700">Human</text><text x="250" y="178" text-anchor="middle" fill="#FF9A43" font-size="39" font-weight="650">authorizes</text><text x="250" y="236" text-anchor="middle" fill="#8F9AA7" font-size="25">approves trust boundaries</text></g>
+  </g>
+  <text x="960" y="804" text-anchor="middle" fill="#D9DFE6" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="32">Connection must not mean surrendering control.</text>
+</svg>

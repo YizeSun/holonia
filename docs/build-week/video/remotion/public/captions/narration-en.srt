@@ -1,0 +1,120 @@
+1
+00:00:00,000 --> 00:00:06,000
+Every person or Agent eventually reaches a task
+beyond its current capability.
+
+2
+00:00:06,000 --> 00:00:12,000
+Holonia asks how that request can find the right capability
+and return a result that can be verified.
+
+3
+00:00:12,000 --> 00:00:18,000
+Holonia is a capability discovery and work-connection network
+for people, Agents, and organizations:
+
+4
+00:00:18,000 --> 00:00:23,000
+request, trusted contact, delegation,
+delivery, and acceptance.
+
+5
+00:00:23,000 --> 00:00:29,000
+But connection must not surrender control.
+In Holonia, the Holon proposes,
+
+6
+00:00:29,000 --> 00:00:34,000
+the Host enforces, and the human authorizes.
+
+7
+00:00:34,000 --> 00:00:41,000
+NearBridge is Holonia’s first working implementation:
+a trusted local edge between an iPhone, a Mac,
+
+8
+00:00:41,000 --> 00:00:44,000
+and Host-controlled capabilities.
+
+9
+00:00:44,000 --> 00:00:50,000
+Today it provides untrusted discovery, approved device identity,
+fresh signed sessions, contact workflows,
+
+10
+00:00:50,000 --> 00:00:55,000
+versioned capability contracts, isolated execution,
+and signed receipts.
+
+11
+00:00:55,000 --> 00:01:01,000
+These contracts can later admit signed third-party adapters,
+controlled context, and approved tools,
+
+12
+00:01:01,000 --> 00:01:06,000
+while Holonia expands to private sessions
+and specialized networks.
+
+13
+00:01:06,000 --> 00:01:13,000
+Both apps are user-launched on the same local network.
+They discover each other but remain untrusted.
+
+14
+00:01:13,000 --> 00:01:17,000
+Discovery is not authentication.
+
+15
+00:01:17,000 --> 00:01:24,000
+The user compares the same six-digit code
+and approves both sides.
+
+16
+00:01:24,000 --> 00:01:30,000
+NearBridge binds the paired keys
+to a fresh authenticated session.
+
+17
+00:01:30,000 --> 00:01:38,000
+The iPhone requests the Mac’s Primary Holon capability.
+A signed contact workflow confirms what is available,
+
+18
+00:01:38,000 --> 00:01:44,000
+while the Mac Host—not the remote
+request—selects the adapter.
+
+19
+00:01:44,000 --> 00:01:53,000
+I ask one ordinary, non-sensitive question. It is signed,
+expiring, correlated to this session, and bounded before execution.
+
+20
+00:01:53,000 --> 00:02:06,000
+The Mac routes it to the selected GPT-5.6 model-only adapter
+inside a separate app-sandboxed XPC service.
+
+21
+00:02:06,000 --> 00:02:14,000
+It has no files, shell, workspace, Git,
+device control, or dynamic tools.
+
+22
+00:02:14,000 --> 00:02:26,000
+The Mac signs the typed answer. The iPhone verifies sender, session,
+expiry, signature, and correlation before displaying it.
+
+23
+00:02:26,000 --> 00:02:35,000
+Both sides retain the same execution receipt.
+Sanitized diagnostics omit prompt, answer, and credential data.
+
+24
+00:02:35,000 --> 00:02:46,000
+Codex helped turn this safety model into nine incremental checkpoints,
+native interfaces, isolated runners, diagnostics, and fifty-four tests.
+
+25
+00:02:46,000 --> 00:02:50,000
+NearBridge is the first working edge of Holonia.

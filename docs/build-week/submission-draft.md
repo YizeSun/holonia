@@ -1,6 +1,6 @@
 # OpenAI Build Week Submission Draft
 
-Status: content-complete draft with one-device-pair P0/P1 physical evidence; add the public repository URL, public YouTube URL, final screenshots, and final Codex Session ID before submission.
+Status: content-complete submission copy with one-device-pair P0/P1 physical evidence. Repository and video links are final. The Codex Session ID is generated and submitted through the Devpost form after `/feedback`; it is not stored in this repository.
 
 ## Project name
 
@@ -30,7 +30,7 @@ The real remote path uses GPT-5.6 through the OpenAI Responses API from a separa
 
 Codex was the engineering collaborator across the complete Build Week implementation: converting a written security/design brief into NB checkpoints; implementing native Swift discovery, pairing, authenticated messages, contact and capability state machines; introducing manifest/registry/execution-profile abstractions; separating local and network XPC runners; diagnosing real-device Bonjour, bundle, entitlement, Keychain, and XPC registration failures; writing tests and runbooks; and preparing the review experience and evidence. The repository’s incremental NB commits and tags preserve that development trail.
 
-Final Devpost step: run `/feedback` in the relevant Codex task and paste the returned Session ID here: `[CODEX_SESSION_ID]`.
+Final Devpost step: open `/feedback` in the primary Codex task, choose to share the existing session, submit the feedback, and paste the returned Session ID into the private Devpost field.
 
 ## Technical implementation
 
@@ -64,9 +64,8 @@ NearBridge demonstrates a practical pattern for personal AI: the best model avai
 - The NB-9 real GPT-5.6 physical path was observed on one iPhone/Mac pair, including signed result display and acknowledgement.
 - The Build Week P0/P1 review UI and correlated receipts were physically observed on one real iPhone/Mac pair; this does not claim the deferred error, longevity, network-switching, or multi-client matrices.
 
-## Links to complete
+## Submission links
 
-- Public repository: `[REPOSITORY_URL]`
-- Public YouTube demo (3 minutes or less, English narration or English translation): `[VIDEO_URL]`
-- Codex Session ID: `[CODEX_SESSION_ID]`
-- Optional project page/contact: `[OPTIONAL_URL]`
+- Public repository: https://github.com/YizeSun/holonia
+- Public YouTube demo (2:50, English narration and captions): https://youtu.be/4s-6gypJUYA
+- Codex Session ID: supplied directly in Devpost from the receipt returned by `/feedback` in the primary build task.
