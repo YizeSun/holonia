@@ -1,6 +1,6 @@
 # NearBridge
 
-**NearBridge is the first working edge of Holonia:** a native iPhone-to-Mac
+**NearBridge is Holonia's first runnable foundation:** a native iPhone-to-Mac
 capability path where discovery stays untrusted, people approve identity, the
 Mac Host controls which model may run, and the iPhone receives a signed,
 correlated result.

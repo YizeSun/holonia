@@ -1,6 +1,6 @@
 # NearBridge Validation Evidence
 
-Last updated: 2026-07-22
+Last updated: 2026-07-22 (Europe/Berlin · CEST · UTC+02:00)
 
 NearBridge has completed one end-to-end physical-device path on a real iPhone
 and Mac. This page separates automated, build, and physical evidence so that a

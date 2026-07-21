@@ -1,6 +1,6 @@
 # Holonia · NearBridge
 
-**NearBridge 是 Holonia 第一个真正运行的边缘实现：**它在 iPhone 与 Mac
+**NearBridge 是 Holonia 的第一个可运行基础：**它在 iPhone 与 Mac
 之间建立一条本地能力路径——发现保持不可信、用户明确确认身份、Mac Host
 决定哪个模型可以运行，iPhone 接收带签名和关联信息的结果。
 
