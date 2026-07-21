@@ -16,18 +16,18 @@ correlated result.
 
 ## Contents
 
-- [The Holonia vision](#the-holonia-vision)
-- [Problem and motivation](#problem-and-motivation)
-- [Why NearBridge comes first](#why-nearbridge-comes-first)
-- [30-second demo flow](#30-second-demo-flow)
-- [Architecture and trust boundaries](#current-nearbridge-architecture)
-- [How Codex and GPT-5.6 are used](#openai-build-week-2026)
-- [Quick start and tests](#quick-start-and-tests)
-- [Physical evidence](#physical-evidence)
-- [Current limitations](#current-limitations)
-- [Roadmap](#roadmap)
-- [NearBridge documentation](#nearbridge-documentation)
-- [Licensing](#licensing)
+1. [The Holonia vision](#the-holonia-vision)
+2. [Problem and motivation](#problem-and-motivation)
+3. [Why NearBridge comes first](#why-nearbridge-comes-first)
+4. [30-second demo flow](#30-second-demo-flow)
+5. [Architecture and trust boundaries](#current-nearbridge-architecture)
+6. [How Codex and GPT-5.6 are used](#openai-build-week-2026)
+7. [Quick start and tests](#quick-start-and-tests)
+8. [Physical evidence](#physical-evidence)
+9. [Current limitations](#current-limitations)
+10. [Roadmap](#roadmap)
+11. [NearBridge documentation](#nearbridge-documentation)
+12. [Licensing](#licensing)
 
 ## The Holonia vision
 
