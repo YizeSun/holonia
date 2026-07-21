@@ -19,6 +19,7 @@ NearBridge 第一阶段只回答一个问题：
 - `NB-5` 已完成实现与自动化验证：iPhone 可在完成联系流程后调用 Mac Host 明确注册的 deterministic text-summary Agent，并接收签名 typed result；没有任意命令、文件、云或动态工具入口。
 - `NB-1 → NB-5` 的最终集成主路径已在真实 iPhone/Mac 上完成；延期环境、生命周期和边界矩阵仍未执行，所以尚不能称为稳定或生产就绪。
 - `NB-6` 已完成实现与自动化验证，并在真实 iPhone/Mac 上跑通 Apple NaturalLanguage 核心路径：Mac 选择编译时 allowlisted Primary Holon Implementation，iPhone 通过统一 `HolonAdapter` facade 调用，Mac 返回 signed real-model result；持久化、adapter 切换和边界矩阵待执行。
+- `NB-7` 已完成通用平台 contract 的实现与自动化验证：版本化 `HolonManifest`、capability registry 和显式 adapter execution profile；真机尚未运行，隔离 runner 与远程模型不属于本 checkpoint 的已实现结论。
 - 每个 `NB` 都使用独立 Git commit 和远端 checkpoint；自动化、模拟器与真机证据分别记录，后续修复添加新 commit，不改写已测试 checkpoint。
 - 不阻塞主线的权限、生命周期、网络环境和候选技术补测记录在 [`nearbridge/deferred-validation-todo.md`](nearbridge/deferred-validation-todo.md)。
 
@@ -157,6 +158,30 @@ Mac 用户本地选择 Primary Holon Implementation
 NB-6 不绑定 Primary Holon Account，不允许远端选模型，不开放文件、workspace、shell、网络或动态工具。当前真实模型选项是 Apple `NaturalLanguage` 的设备端 language/sentiment model，不是 LLM。
 
 当前实现、自动化证据、明确非目标和下一条真机步骤见 [`nearbridge/nb6-results.md`](nearbridge/nb6-results.md)。
+
+### NB-7：通用 Holon manifest、registry 与 execution profile
+
+NB-7 把 NB-6 的编译时 adapter 描述升级为可验证的通用 contract：
+
+```text
+versioned HolonManifest
+→ typed capability schemas and limits
+→ duplicate-safe capability registry
+→ explicit isolation/network/credential profile
+→ Host resolves a capability to one implementation boundary
+```
+
+当前允许的 profile 仍非常窄：同进程 inert-text handler、无网络的 app-sandboxed local-model runner，以及未来明确授权的 OpenAI model-only provider。所有当前 profile 都拒绝文件读写、命令执行和动态工具。声明 profile 不等于执行环境已经具备对应强隔离；隔离 runner 必须在后续 checkpoint 由独立进程和 entitlements 实现并验证。
+
+当前实现、自动化证据和非目标见 [`nearbridge/nb7-results.md`](nearbridge/nb7-results.md)。
+
+### 通用平台之后的实施顺序
+
+1. `NB-8`：Host 管理的本地生成模型通过独立 app-sandboxed runner 执行，默认无文件、无命令、无网络。
+2. `NB-9`：iPhone 通过稳定 question-answer capability 调用所选 Mac Primary Holon，并显示 signed typed answer。
+3. `NB-10`：增加显式网络披露与 Keychain API key 的 OpenAI model-only adapter；不使用 Codex App/CLI 登录，也不传 tools。
+4. 后续：签名第三方 adapter 的准入、版本兼容和隔离验证。
+5. 更晚：只读项目分析与可写/命令型 Codex Agent，按独立安全计划推进。
 
 ### NB-5 完成后的含义
 

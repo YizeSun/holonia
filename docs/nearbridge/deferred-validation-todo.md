@@ -1,6 +1,6 @@
 # NearBridge 延期验证 TODO
 
-更新时间：2026-07-20
+更新时间：2026-07-21
 
 ## 1. 用途
 
@@ -76,3 +76,25 @@
 4. 相关截图或日志位置；
 5. `Observed`、`Simulated`、`Code-inspected` 或 `Not tested` 分类；
 6. 是否产生需要回到主线修复的问题。
+
+## 9. 通用 Primary Holon 平台后续功能 TODO
+
+以下不是稳定性补测，而是明确尚未实现的产品/安全层。保存在这里是为了防止当前 model-only 平台被误解为已经拥有 Codex 工具权限。
+
+### 9.1 让 Codex 读取项目并分析
+
+- [ ] 用户在 Mac Host 上显式选择允许的 workspace；远端不能提交任意路径。
+- [ ] 建立只读文件 broker，默认拒绝 workspace 外路径、隐藏凭据、Keychain、SSH 和系统目录。
+- [ ] 定义文件类型、单文件大小、总上下文预算、symlink 和 package cache policy。
+- [ ] 每次分析显示将读取的范围，并支持批准、取消和完整审计。
+- [ ] 对 prompt injection、二进制文件、超大仓库和敏感数据泄漏做威胁建模与测试。
+
+### 9.2 让 Codex 修改代码、运行命令并长期工作
+
+- [ ] 写入必须使用独立 worktree/临时分支，并提供 diff 审阅与可恢复 rollback。
+- [ ] 命令只能通过 typed allowlist tool broker；不能把自然语言直接拼接成 shell。
+- [ ] 高风险命令、网络访问、安装依赖、凭据读取和外部副作用逐次审批。
+- [ ] 独立 runner 的 CPU、内存、磁盘、token、时间和并发预算，以及强制取消。
+- [ ] 崩溃、睡眠、断网和 Host 重启后的 durable job state 与安全恢复。
+- [ ] 输出、工具调用、批准、文件 diff 和外部副作用形成可导出审计链。
+- [ ] 在完成安全评审与真机/故障矩阵前，不引入 always-running daemon。

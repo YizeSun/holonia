@@ -18,6 +18,7 @@ public struct PrimaryHolonDescriptor: Codable, Equatable, Identifiable, Sendable
     public let runtime: PrimaryHolonRuntime
     public let modelDisclosure: String
     public let capability: NearBridgeCapabilityDescriptor
+    public let executionProfile: AdapterExecutionProfile
 
     public var id: String { implementationID }
     public var usesRealModel: Bool { runtime == .appleNaturalLanguage }
@@ -28,7 +29,8 @@ public struct PrimaryHolonDescriptor: Codable, Equatable, Identifiable, Sendable
         adapterLabel: String,
         runtime: PrimaryHolonRuntime,
         modelDisclosure: String,
-        capability: NearBridgeCapabilityDescriptor
+        capability: NearBridgeCapabilityDescriptor,
+        executionProfile: AdapterExecutionProfile = .boundedHostProcess
     ) {
         self.implementationID = implementationID
         self.displayName = displayName
@@ -36,6 +38,7 @@ public struct PrimaryHolonDescriptor: Codable, Equatable, Identifiable, Sendable
         self.runtime = runtime
         self.modelDisclosure = modelDisclosure
         self.capability = capability
+        self.executionProfile = executionProfile
     }
 }
 
@@ -59,24 +62,51 @@ public struct HolonTextResult: Equatable, Sendable {
 /// It accepts inert text and returns inert text; no Host service, file, network,
 /// process, identity key, or dynamic tool is exposed through this interface.
 public protocol HolonAdapter: Sendable {
+    var manifest: HolonManifest { get }
     var descriptor: PrimaryHolonDescriptor { get }
     func execute(_ request: HolonTextRequest) throws -> HolonTextResult
 }
 
+public extension HolonAdapter {
+    var descriptor: PrimaryHolonDescriptor {
+        let capability = manifest.capabilities[0]
+        return PrimaryHolonDescriptor(
+            implementationID: manifest.implementationID,
+            displayName: manifest.displayName,
+            adapterLabel: manifest.adapterLabel,
+            runtime: primaryHolonRuntime,
+            modelDisclosure: manifest.modelDisclosure,
+            capability: NearBridgeCapabilityDescriptor(
+                capabilityID: capability.capabilityID,
+                displayName: capability.displayName,
+                executorLabel: manifest.adapterLabel,
+                maximumInputCharacters: capability.maximumInputCharacters,
+                maximumOutputCharacters: capability.maximumOutputCharacters
+            ),
+            executionProfile: manifest.executionProfile
+        )
+    }
+
+    private var primaryHolonRuntime: PrimaryHolonRuntime {
+        PrimaryHolonRuntime(rawValue: manifest.runtimeLabel) ?? .deterministicSwift
+    }
+}
+
 public struct AppleNaturalLanguageHolonAdapter: HolonAdapter {
-    public let descriptor = PrimaryHolonDescriptor(
+    public let manifest = HolonManifest(
         implementationID: PrimaryHolonImplementationID.appleNaturalLanguage,
+        vendorID: "org.holonia",
         displayName: "Apple Natural Language",
         adapterLabel: "AppleNaturalLanguageHolonAdapter",
-        runtime: .appleNaturalLanguage,
+        runtimeLabel: PrimaryHolonRuntime.appleNaturalLanguage.rawValue,
         modelDisclosure: "Apple on-device language and sentiment models; no cloud request",
-        capability: NearBridgeCapabilityDescriptor(
+        capabilities: [HolonCapabilityManifest(
             capabilityID: ContactDemoCapability.primaryHolonTextInsight,
             displayName: "Primary Holon text insight",
-            executorLabel: "AppleNaturalLanguageHolonAdapter (on-device model)",
             maximumInputCharacters: 1_200,
             maximumOutputCharacters: 280
-        )
+        )],
+        executionProfile: .boundedHostProcess
     )
 
     public init() {}
@@ -115,19 +145,20 @@ public struct AppleNaturalLanguageHolonAdapter: HolonAdapter {
 }
 
 public struct DeterministicDemoHolonAdapter: HolonAdapter {
-    public let descriptor = PrimaryHolonDescriptor(
+    public let manifest = HolonManifest(
         implementationID: PrimaryHolonImplementationID.deterministicDemo,
+        vendorID: "org.holonia",
         displayName: "Deterministic summary demo",
         adapterLabel: "DeterministicDemoHolonAdapter",
-        runtime: .deterministicSwift,
+        runtimeLabel: PrimaryHolonRuntime.deterministicSwift.rawValue,
         modelDisclosure: "Deterministic Swift fallback; no model is used",
-        capability: NearBridgeCapabilityDescriptor(
+        capabilities: [HolonCapabilityManifest(
             capabilityID: ContactDemoCapability.primaryHolonTextInsight,
             displayName: "Primary Holon text insight",
-            executorLabel: "DeterministicDemoHolonAdapter (no model)",
             maximumInputCharacters: 1_200,
             maximumOutputCharacters: 280
-        )
+        )],
+        executionProfile: .boundedHostProcess
     )
 
     public init() {}
@@ -142,6 +173,9 @@ struct PrimaryHolonCatalog {
     private let adaptersByID: [String: any HolonAdapter]
 
     init(adapters: [any HolonAdapter]) {
+        for adapter in adapters {
+            precondition((try? adapter.manifest.validate()) != nil, "Invalid built-in Holon manifest")
+        }
         adaptersByID = Dictionary(
             adapters.map { ($0.descriptor.implementationID, $0) },
             uniquingKeysWith: { _, latest in latest }
@@ -157,6 +191,11 @@ struct PrimaryHolonCatalog {
 
     var descriptors: [PrimaryHolonDescriptor] {
         adaptersByID.values.map(\.descriptor).sorted { $0.displayName < $1.displayName }
+    }
+
+    var capabilityRegistry: HolonCapabilityRegistry {
+        // Built-in manifests are validated during catalog construction.
+        try! HolonCapabilityRegistry(manifests: adaptersByID.values.map(\.manifest))
     }
 
     func adapter(implementationID: String) -> (any HolonAdapter)? {

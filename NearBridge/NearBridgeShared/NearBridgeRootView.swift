@@ -14,9 +14,9 @@ public struct NearBridgeRootView: View {
         NavigationStack {
             List {
                 Section {
-                    Label("Primary Holon adapter checkpoint", systemImage: "cpu")
+                    Label("Generic Holon contract checkpoint", systemImage: "shippingbox")
                         .foregroundStyle(.orange)
-                    Text("NB-6 lets the Mac Host select one allowlisted Primary Holon adapter. The real-model option uses Apple on-device NaturalLanguage only; the adapter receives no command, file, cloud, workspace, or dynamic tool interface.")
+                    Text("NB-7 gives each Host-approved implementation a validated HolonManifest, capability schema registry, and explicit execution profile. No dynamic plugin loading or new file, command, workspace, or tool authority is introduced.")
                         .font(.caption)
                 }
 
@@ -49,6 +49,8 @@ public struct NearBridgeRootView: View {
                         LabeledContent("Adapter", value: selected.adapterLabel)
                         LabeledContent("Runtime", value: selected.runtime.rawValue)
                         LabeledContent("Real model", value: selected.usesRealModel ? "yes · on-device" : "no · deterministic")
+                        LabeledContent("Isolation", value: selected.executionProfile.isolationBoundary.rawValue)
+                        LabeledContent("Network", value: selected.executionProfile.networkPolicy.rawValue)
                         Text(selected.modelDisclosure)
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -207,7 +209,7 @@ public struct NearBridgeRootView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                Section("NB-6 Primary Holon demo") {
+                Section("NB-7 Generic Holon demo") {
                     if controller.registeredCapabilities.isEmpty {
                         Text("This device registers no executable capability.")
                             .font(.caption)

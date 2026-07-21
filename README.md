@@ -2,7 +2,7 @@
 
 Holonia 是一个面向人、Agent 与组织的能力发现和工作连接网络。它让一个主体在自身能力不足时，可以寻找其他能力、建立私密联系，并在适合的专业网络中完成委托、交付与验收。
 
-项目当前处于概念固定与 NearBridge 第一阶段实现期，尚未冻结公开协议。NearBridge `NB-0` 的普通 Wi-Fi 真机核心路径已经跑通，`NB-1` 到 `NB-5` 的最终集成纵向链路已有真实 iPhone/Mac 证据；`NB-6` 的 Mac Primary Holon Implementation 选择、统一 Holon adapter 和 Apple 设备端 NaturalLanguage model 也已完成自动化、双目标构建和单一设备对上的真机核心路径。延期边界与稳定性矩阵仍未完成，当前不是生产就绪版本。
+项目当前处于概念固定与 NearBridge 通用 Primary Holon 平台实现期，尚未冻结公开协议。NearBridge `NB-0` 的普通 Wi-Fi 真机核心路径已经跑通，`NB-1` 到 `NB-5` 的最终集成纵向链路已有真实 iPhone/Mac 证据；`NB-6` 的 Mac Primary Holon Implementation 选择、统一 Holon adapter 和 Apple 设备端 NaturalLanguage model 也已完成自动化、双目标构建和单一设备对上的真机核心路径。`NB-7` 开始把编译时示例收敛为带版本的 manifest、capability registry 和 execution profile；其自动化与构建状态单独记录，不外推为真机结果。延期边界与稳定性矩阵仍未完成，当前不是生产就绪版本。
 
 ## 已确定的命名关系
 
@@ -22,13 +22,35 @@ Holonia 是一个面向人、Agent 与组织的能力发现和工作连接网络
 - [NearBridge 第一阶段计划](docs/nearbridge-plan.md)
 - [NearBridge 阶段验证状态](docs/nearbridge/progress.md)
 - [NearBridge NB-6 Primary Holon checkpoint](docs/nearbridge/nb6-results.md)
+- [NearBridge NB-7 通用 Holon contract checkpoint](docs/nearbridge/nb7-results.md)
 - [NearBridge 延期验证 TODO](docs/nearbridge/deferred-validation-todo.md)
 - [小型代码任务网络计划](docs/code-network-plan.md)
 - [开放问题和后续决策](docs/open-questions.md)
 
 ## 当前实施顺序
 
-1. 完成 NearBridge 的最小跨设备通信闭环。
-2. 在 NearBridge 上跑通最简单的联系型需求。
-3. 收窄并验证“已有代码仓库中的小型、可验证任务”。
-4. 在真实使用反馈出现后，再决定开放网络、信誉公式、支付和更复杂的专业网络。
+1. 已完成 NearBridge 的最小跨设备通信、认证、联系与窄能力调用闭环。
+2. 建立通用 `HolonManifest`、capability registry 和 adapter execution profile。
+3. 把 Host 管理的本地生成模型放入无文件、无命令、默认无网络的隔离 runner。
+4. 增加明确选择、明确凭据和明确网络披露的 model-only OpenAI/Codex adapter，让 iPhone 可以向 Mac 发问并显示回答。
+5. 完成签名第三方 adapter 的准入与隔离协议后，再考虑更强的工具型 Agent。
+
+## 已实现与仍未实现
+
+当前已经实现：局域网发现、用户配对、稳定 Host 身份、fresh-session 认证、签名/过期/去重消息、联系状态机、Host allowlist capability、Primary Holon Implementation 选择，以及一个真实 Apple 设备端分类模型 adapter。`NB-7` 进一步提供带版本且可验证的 manifest、稳定 capability schema、registry 路由和显式 execution profile；这些 contract 默认拒绝文件读写、命令执行和动态工具。
+
+正在实现的下一条纵向路径是：
+
+```text
+iPhone 输入普通问题
+→ authenticated NearBridge request
+→ Mac Host policy + capability registry
+→ 用户选择的受限 Primary Holon adapter
+→ 本地隔离模型或明确授权的 OpenAI model-only API
+→ signed typed result
+→ iPhone 显示答案
+```
+
+这里的“Codex”只指 OpenAI 的强模型回答纯文本问题；它不会继承 Codex App/CLI 的登录状态，也不会获得 workspace、文件、shell、Git 或任意 tool access。用户需要在 Mac App 内单独配置 API key，凭据只由 Host Keychain 管理。
+
+以下能力明确尚未实现，并保存在 TODO：让 Codex 读取项目并分析，需要受控的 workspace selector、只读文件 broker、上下文预算和逐次授权；让 Codex 自主修改代码、运行命令或长期工作，还需要命令/写入策略、隔离、审批、取消、资源预算、崩溃恢复和审计。它们不会借由“第三方模型本身可能有沙箱”而自动获得授权。
