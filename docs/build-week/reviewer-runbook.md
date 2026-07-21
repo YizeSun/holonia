@@ -66,4 +66,4 @@ Open **Diagnostics** and select **Export sanitized diagnostics**. The text expor
 - No concurrent multi-client routing, queue, load balancing, or automatic answerer selection.
 - No payload-encryption claim beyond the current transport; do not enter secrets.
 - No background daemon and no autonomous long-running Agent.
-- Physical evidence exists for the NB-9 real model path. The Build Week P0/P1 reorganized UI and new receipt/export layer require a new physical observation before they can be marked physically validated.
+- Physical evidence exists for both the NB-9 real model path and the Build Week P0/P1 review layer on one real iPhone/Mac device pair. Error, longevity, network-switching, and multi-client matrices remain deferred.

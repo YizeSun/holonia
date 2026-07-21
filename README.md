@@ -2,7 +2,7 @@
 
 Holonia 是一个面向人、Agent 与组织的能力发现和工作连接网络。它让一个主体在自身能力不足时，可以寻找其他能力、建立私密联系，并在适合的专业网络中完成委托、交付与验收。
 
-项目当前处于概念固定与 NearBridge 通用 Primary Holon 平台验证期，尚未冻结公开协议。NearBridge `NB-0` 的普通 Wi-Fi 真机核心路径已经跑通，`NB-1` 到 `NB-5` 的最终集成纵向链路已有真实 iPhone/Mac 证据；`NB-6` 的 Mac Primary Holon Implementation 选择、统一 Holon adapter 和 Apple 设备端 NaturalLanguage model 也已完成自动化、双目标构建和单一设备对上的真机核心路径。`NB-7` 建立带版本的 manifest、capability registry 和 execution profile；`NB-8` 增加嵌入 Mac App、默认无文件/命令/网络接口的 app-sandboxed Apple Foundation Models XPC runner；`NB-9` 增加由 Mac Host 明确选择、以 Keychain 凭据调用固定 OpenAI Responses API 模型的 model-only adapter。NB-9 已在一台真实 iPhone 与一台 Mac 上完成问题、受限模型调用、签名结果显示和 acknowledgement 主路径。Build Week `P0/P1 Review Readiness` 把同一纵向链路整理为评审可读的 Demo/Diagnostics 双视图，加入 readiness、示例问题、签名执行回执、安全诊断导出和 OpenAI safety identifier；它不占用路线图中预留给第三方 adapter 准入的 `NB-10`。其自动化与构建状态记录在 checkpoint 文档中，新的真机 UI 尚待观察。错误、重复性、多设备和生命周期矩阵仍未完成，当前不是生产就绪版本。
+项目当前处于概念固定与 NearBridge 通用 Primary Holon 平台验证期，尚未冻结公开协议。NearBridge `NB-0` 的普通 Wi-Fi 真机核心路径已经跑通，`NB-1` 到 `NB-5` 的最终集成纵向链路已有真实 iPhone/Mac 证据；`NB-6` 的 Mac Primary Holon Implementation 选择、统一 Holon adapter 和 Apple 设备端 NaturalLanguage model 也已完成自动化、双目标构建和单一设备对上的真机核心路径。`NB-7` 建立带版本的 manifest、capability registry 和 execution profile；`NB-8` 增加嵌入 Mac App、默认无文件/命令/网络接口的 app-sandboxed Apple Foundation Models XPC runner；`NB-9` 增加由 Mac Host 明确选择、以 Keychain 凭据调用固定 OpenAI Responses API 模型的 model-only adapter。NB-9 已在一台真实 iPhone 与一台 Mac 上完成问题、受限模型调用、签名结果显示和 acknowledgement 主路径。Build Week `P0/P1 Review Readiness` 把同一纵向链路整理为评审可读的 Demo/Diagnostics 双视图，加入 readiness、示例问题、签名执行回执、安全诊断导出和 OpenAI safety identifier；它不占用路线图中预留给第三方 adapter 准入的 `NB-10`。同一真实设备对已观察两端 readiness、相关联 execution receipt 和净化导出主路径。错误、重复性、多设备和生命周期矩阵仍未完成，当前不是生产就绪版本。
 
 ## OpenAI Build Week 2026
 

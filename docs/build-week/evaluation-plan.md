@@ -34,12 +34,12 @@ This plan follows a small, reproducible eval set instead of relying on one succe
 
 | Case | Classification before run | Pass evidence |
 | --- | --- | --- |
-| Build Week P0/P1 Demo view on iPhone and Mac | Not tested | Both layouts readable; readiness guides the next action |
+| Build Week P0/P1 Demo view on iPhone and Mac | Passed on one real device pair | Both layouts reported 5/5 readiness ready and exposed correlated receipts |
 | Same-Wi-Fi discovery | Previously observed at NB-9 | Both nodes appear without being marked trusted |
 | Fresh pairing | Previously observed at NB-9 | Matching code, authenticated state on both sides |
 | OpenAI real answer | Previously observed at NB-9 | iPhone answer, Mac signed result, iPhone acknowledgement |
-| Build Week P0/P1 execution receipt | Not tested | Same invocation/provider/capability and terminal receipt state |
-| Sanitized export | Not tested | Shareable text, no prompt, answer, API key, or Authorization value |
+| Build Week P0/P1 execution receipt | Passed on one real device pair | Same invocation/capability; iPhone acknowledgement sent and Mac received |
+| Sanitized export | Passed on both real-device roles | Shareable text contained no prompt, answer, API key, or Authorization value |
 | Invalid key | Not tested | Clear failure, no credential/provider body leak, retry available |
 | Wi-Fi unavailable | Not tested | Actionable discovery/error state, no false authentication |
 

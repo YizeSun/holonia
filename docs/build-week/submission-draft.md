@@ -1,6 +1,6 @@
 # OpenAI Build Week Submission Draft
 
-Status: content-complete draft; add the public repository URL, public YouTube URL, screenshots, final Codex Session ID, and final physical P0/P1 result before submission.
+Status: content-complete draft with one-device-pair P0/P1 physical evidence; add the public repository URL, public YouTube URL, final screenshots, and final Codex Session ID before submission.
 
 ## Project name
 
@@ -62,7 +62,7 @@ NearBridge demonstrates a practical pattern for personal AI: the best model avai
 - Shared unit tests cover message validation, pairing, workflow, capability routing, manifests/profiles, OpenAI request boundaries, readiness, receipt behavior, redaction, and safety identifiers.
 - Both app targets are built with the macOS and generic iOS Device SDKs.
 - The NB-9 real GPT-5.6 physical path was observed on one iPhone/Mac pair, including signed result display and acknowledgement.
-- The Build Week P0/P1 review UI must be physically observed and recorded separately; automated/build success is not labeled as physical success.
+- The Build Week P0/P1 review UI and correlated receipts were physically observed on one real iPhone/Mac pair; this does not claim the deferred error, longevity, network-switching, or multi-client matrices.
 
 ## Links to complete
 

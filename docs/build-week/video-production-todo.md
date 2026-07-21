@@ -1,6 +1,6 @@
 # Build Week Video Production TODO
 
-Deferred until the Build Week P0/P1 implementation, tests, builds, and final physical walkthrough are stable.
+Unblocked by the successful Build Week P0/P1 implementation, tests, builds, and one-device-pair physical walkthrough. Final capture and editing remain intentionally deferred to the last submission step.
 
 ## Deliverable constraints
 

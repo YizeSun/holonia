@@ -125,7 +125,7 @@
 
 ## 10. Build Week 最终展示 TODO
 
-- [ ] 从最终 Build Week P0/P1 commit 在真实 iPhone/Mac 上完成 reviewer runbook，一次性保存两端回执与 sanitized diagnostics。
+- [x] 从最终 Build Week P0/P1 commit 在真实 iPhone/Mac 上完成 reviewer runbook，保存两端相关联回执与 sanitized diagnostics；2026-07-21 单一设备对主路径通过。
 - [ ] 运行 invalid key 或离线失败 → 修复 → Retry，确认错误清晰、key/provider body 不泄漏。
 - [ ] 最终冻结英文 3 分钟脚本、点击顺序、旁白、字幕和 side-by-side 版式。
 - [ ] 使用物理 iPhone 作为核心证明；simulator 只允许作为明确标注的补充 UI 镜头。
