@@ -17,17 +17,18 @@ correlated result.
 ## Contents
 
 1. [The Holonia vision](#the-holonia-vision)
-2. [Problem and motivation](#problem-and-motivation)
-3. [Why NearBridge comes first](#why-nearbridge-comes-first)
-4. [30-second demo flow](#30-second-demo-flow)
-5. [Architecture and trust boundaries](#current-nearbridge-architecture)
-6. [How Codex and GPT-5.6 are used](#openai-build-week-2026)
-7. [Quick start and tests](#quick-start-and-tests)
-8. [Physical evidence](#physical-evidence)
-9. [Current limitations](#current-limitations)
-10. [Roadmap](#roadmap)
-11. [NearBridge documentation](#nearbridge-documentation)
-12. [Licensing](#licensing)
+2. [How NearBridge fits into Holonia](#how-nearbridge-fits-into-holonia)
+3. [Problem and motivation](#problem-and-motivation)
+4. [Why NearBridge comes first](#why-nearbridge-comes-first)
+5. [30-second demo flow](#30-second-demo-flow)
+6. [Architecture and trust boundaries](#current-nearbridge-architecture)
+7. [How Codex and GPT-5.6 are used](#openai-build-week-2026)
+8. [Quick start and tests](#quick-start-and-tests)
+9. [Physical evidence](#physical-evidence)
+10. [Current limitations](#current-limitations)
+11. [Roadmap](#roadmap)
+12. [NearBridge documentation](#nearbridge-documentation)
+13. [Licensing](#licensing)
 
 ## The Holonia vision
 
@@ -60,19 +61,46 @@ The governing principle is:
 - **Specialized Networks** can later define domain-specific matching,
   acceptance, payment, reputation, and compliance rules.
 
-```mermaid
-flowchart TD
-    Person["Person or organization"] --> Account["Primary Holon Account<br/>stable identity, relationships, history"]
-    Account --> Impl["Selected Primary Holon Implementation<br/>replaceable model or Agent"]
-    Impl --> Proposal["Proposal"]
-    Proposal --> Host["Holonia Host<br/>policy, keys, permissions, audit"]
-    Host -->|"human-approved local action"| NearBridge["NearBridge<br/>local capability path"]
-    Host -->|"future bounded request"| Core["Holonia Core"]
-    Core --> Networks["Specialized Networks<br/>code, procurement, hiring, compute, …"]
-```
-
 The broader Holonia design remains intentionally unfrozen. NearBridge is the
 concrete, working implementation developed in this repository.
+
+## How NearBridge fits into Holonia
+
+```mermaid
+flowchart TD
+    Holonia["Holonia<br/>Capability discovery · trusted contact · delegation · delivery · acceptance"]
+    NearBridge["NearBridge<br/>Holonia's first runnable foundation"]
+    Holonia --> NearBridge
+
+    subgraph Implemented["IMPLEMENTED IN NEARBRIDGE"]
+        Discovery["Local discovery<br/>and device trust"]
+        Messages["Authenticated messages<br/>and contact workflows"]
+        Interfaces["General capability<br/>and adapter interfaces"]
+        Results["Bounded model execution<br/>and auditable results"]
+    end
+
+    NearBridge --> Discovery
+    NearBridge --> Messages
+    NearBridge --> Interfaces
+    NearBridge --> Results
+
+    subgraph Future["NEXT / LATER"]
+        ThirdParty["Signed third-party<br/>Holon adapters"]
+        Context["Controlled read-only<br/>project context"]
+        Agents["Approval-gated<br/>tool-using Agents"]
+        Core["Holonia Core · propagation<br/>private sessions · specialized networks"]
+    end
+
+    NearBridge -.-> ThirdParty
+    NearBridge -.-> Context
+    NearBridge -.-> Agents
+    Holonia -.-> Core
+```
+
+Solid lines are implemented by the current NearBridge checkpoint. Dashed lines
+are planned layers and are not current capability claims. For the more detailed
+account, implementation, proposal, and Host authority model, see
+[Holonia role and authority details](docs/build-week/holonia-role-architecture.md).
 
 ## Problem and motivation
 
