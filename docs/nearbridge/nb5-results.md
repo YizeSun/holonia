@@ -1,6 +1,6 @@
 # NearBridge NB-5 Results
 
-Status: **Implementation and automated checkpoint passed; physical validation pending.**
+Status: **Implementation, automated checkpoint, and the core integrated physical Agent path passed; the deferred boundary/stability matrix remains pending.**
 
 ## Scope
 
@@ -85,7 +85,9 @@ iOS 是 Device SDK 构建，不是安装或运行。
 
 ## Physical evidence
 
-**Pending.** 不能从单元测试或 NB-0 的旧 ping/pong 外推。
+2026-07-21 在最终集成 build 上完成真机主路径：iPhone 调用 `holonia.capability.text-summary.extractive.v1`，Mac 的 `LocalSummaryAgent (deterministic demo)` 显示 `Execution: succeeded`、发送 signed `capabilityResult` 并收到 acknowledgement；iPhone 显示 `Execution: succeeded` 和预期的前两句摘要。
+
+运行使用 `68ee156` 的 NearBridge 实现；为解决 macOS local-network privacy 对 ad-hoc identity 的 `NoAuth (-65555)`，tested workspace 增加 Mac Apple development signing，并由后续 commit `2c76865` 固化。命令样 inert-text、1,201 字符拒绝、重复调用和 failure UI 未运行，仍保留为延期测试。完整分类见 [`physical-validation-2026-07-21.md`](physical-validation-2026-07-21.md)。
 
 ## Next physical test
 

@@ -1,6 +1,6 @@
 # NearBridge NB-4 Results
 
-Status: **Implementation and automated checkpoint passed; physical validation pending.**
+Status: **Implementation and automated checkpoint passed; the core Contact workflow was later observed in the final integrated physical build, while disconnect/reset validation remains pending.**
 
 ## Scope
 
@@ -78,7 +78,7 @@ iOS 是 Device SDK 构建，不是安装或运行。
 
 ## Physical evidence
 
-**Pending.**
+2026-07-21 在最终集成 build 上观察到 iPhone request、Mac capability response、iPhone acceptance、Mac completion，并在两端达到 `Contact flow completed`；诊断包含 signed workflow messages、correlation UUID 与 acknowledgement。没有执行 disconnect 后的 session-scoped reset 或非法顺序注入。详见 [`physical-validation-2026-07-21.md`](physical-validation-2026-07-21.md)。
 
 ## Next physical test
 

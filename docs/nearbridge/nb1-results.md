@@ -1,6 +1,6 @@
 # NearBridge NB-1 Results
 
-Status: **Implementation and automated checkpoint passed; physical validation pending.**
+Status: **Implementation and automated checkpoint passed; core discovery was later observed in the final integrated physical build, while the NB-1-specific matrix remains pending.**
 
 ## Scope
 
@@ -59,7 +59,7 @@ xcodebuild -project NearBridge/NearBridge.xcodeproj \
 
 ## Physical evidence
 
-**Pending.** NB-0 的真机成功不能自动外推到 NB-1 的新二进制、服务类型和 session gate。
+2026-07-21 在最终集成 build 上观察到 iPhone 与 Mac 双向发现，双方显示对端且 discovery 达到 `peerDiscovered`。该运行基于 `68ee156` 实现与 `2c76865` 固化的 Mac development signing 配置；它没有逐独立安装 NB-1 checkpoint，也没有执行 Stop/peer-lost/restart/dedup 专项矩阵。详见 [`physical-validation-2026-07-21.md`](physical-validation-2026-07-21.md)。
 
 ## Next physical test
 

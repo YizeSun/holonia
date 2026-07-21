@@ -1,6 +1,6 @@
 # NearBridge NB-3 Results
 
-Status: **Implementation and automated checkpoint passed; physical validation pending.**
+Status: **Implementation and automated checkpoint passed; signed integrated workflow/capability traffic was later observed physically, while the dedicated NB-3 ping/disconnect matrix remains pending.**
 
 ## Scope
 
@@ -72,7 +72,7 @@ iOS 是 Device SDK 构建，不是安装或运行。
 
 ## Physical evidence
 
-**Pending.**
+2026-07-21 在 authenticated physical session 上观察到带 message UUID 的 signed Contact/capability messages 与 acknowledgements 双向传输。这证明最终集成 build 的 NB-3 message layer 被后续阶段实际使用；本次没有运行 iPhone→Mac 与 Mac→iPhone 的专用 signed ping/pong/ack，也没有验证 disconnect/reconnect session reset。详见 [`physical-validation-2026-07-21.md`](physical-validation-2026-07-21.md)。
 
 ## Next physical test
 
