@@ -9,6 +9,9 @@ correlated result.
 [Reviewer runbook](docs/build-week/reviewer-runbook.md) ·
 [Validation evidence](docs/build-week/validation-evidence.md)
 
+Built for [OpenAI Build Week 2026](https://openai.com/build-week/) with Codex
+and GPT-5.6.
+
 > **Experimental checkpoint:** one real iPhone/Mac pair has completed the
 > Build Week happy path. NearBridge is not production-ready and does not claim
 > payload encryption, concurrent multi-client routing, or arbitrary Agent
