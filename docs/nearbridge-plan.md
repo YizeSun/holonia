@@ -22,6 +22,7 @@ NearBridge 第一阶段只回答一个问题：
 - `NB-7` 已完成通用平台 contract 的实现与自动化验证：版本化 `HolonManifest`、capability registry 和显式 adapter execution profile；真机尚未运行，隔离 runner 与远程模型不属于本 checkpoint 的已实现结论。
 - `NB-8` 已完成独立 app-sandboxed Apple Foundation Models XPC runner、Host 单次并发策略、session 结束后丢弃结果以及有界 XPC contract；共享测试、macOS/iOS 构建和 Mac bundle 嵌入检查通过，签名 entitlement 与跨设备生成结果待真机验证。
 - `NB-9` 已完成 OpenAI model-only Primary Holon adapter、Mac Host Keychain 凭据管理、固定 Responses API 请求和独立 network-client XPC runner；共享测试、macOS/iOS 构建和双 XPC bundle 检查通过，并在一个真实 iPhone/Mac 设备对上观察到 signed question → model-only answer → acknowledgement 主路径。错误、重复性和多设备矩阵仍待验证。
+- Build Week `P0/P1 Review Readiness` 已完成：默认 Demo 与详细 Diagnostics、五项 readiness、示例问题、signed execution receipt、净化导出、session safety identifier 和评审/提交/eval 文档。54/54 测试和 macOS/iOS Device 构建通过；重组后的 UI、回执和导出待真机观察。它不占用下文预留给第三方 adapter 准入的 `NB-10`。
 - 每个 `NB` 都使用独立 Git commit 和远端 checkpoint；自动化、模拟器与真机证据分别记录，后续修复添加新 commit，不改写已测试 checkpoint。
 - 不阻塞主线的权限、生命周期、网络环境和候选技术补测记录在 [`nearbridge/deferred-validation-todo.md`](nearbridge/deferred-validation-todo.md)。
 

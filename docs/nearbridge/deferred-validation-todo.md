@@ -122,3 +122,12 @@
 - [ ] 崩溃、睡眠、断网和 Host 重启后的 durable job state 与安全恢复。
 - [ ] 输出、工具调用、批准、文件 diff 和外部副作用形成可导出审计链。
 - [ ] 在完成安全评审与真机/故障矩阵前，不引入 always-running daemon。
+
+## 10. Build Week 最终展示 TODO
+
+- [ ] 从最终 Build Week P0/P1 commit 在真实 iPhone/Mac 上完成 reviewer runbook，一次性保存两端回执与 sanitized diagnostics。
+- [ ] 运行 invalid key 或离线失败 → 修复 → Retry，确认错误清晰、key/provider body 不泄漏。
+- [ ] 最终冻结英文 3 分钟脚本、点击顺序、旁白、字幕和 side-by-side 版式。
+- [ ] 使用物理 iPhone 作为核心证明；simulator 只允许作为明确标注的补充 UI 镜头。
+- [ ] 分开录制 iPhone/Mac 原生画面并按 execution receipt 时间线同步；导出前检查通知、桌面、API key 和个人信息。
+- [ ] 上传 public YouTube、确认时长/声音/英文可理解性，并在 Devpost 填写 repo、README/test instructions 与 `/feedback` Codex Session ID。

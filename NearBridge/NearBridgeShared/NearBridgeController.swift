@@ -28,6 +28,8 @@ public final class NearBridgeController: ObservableObject {
     @Published public private(set) var selectedPrimaryHolon: PrimaryHolonDescriptor?
     @Published public private(set) var openAIAPIKeyConfigured = false
     @Published public private(set) var openAICredentialIssue: String?
+    @Published public private(set) var remotePrimaryHolonDisclosure: String?
+    @Published public private(set) var lastExecutionReceipt: NearBridgeExecutionReceipt?
 
     public let role: DeviceRole
     public let phase = NearBridgeBuild.phase
@@ -101,6 +103,48 @@ public final class NearBridgeController: ObservableObject {
 
     public var primaryHolonSelectionLocked: Bool {
         [.connecting, .connected, .reconnecting].contains(sessionState) || authenticatedSessionState != .idle
+    }
+
+    public var reviewReadiness: [NearBridgeReadinessItem] {
+        let selected = role == .mac ? selectedPrimaryHolon != nil : (remotePrimaryHolonDisclosure != nil || contactWorkflowState == .completed)
+        let needsCredential = role == .mac && selectedPrimaryHolon?.implementationID == PrimaryHolonImplementationID.openAIModelOnly
+        return NearBridgeReviewReadiness.items(for: NearBridgeReadinessContext(
+            isRunning: isRunning,
+            localNetworkAccess: localNetworkAccess,
+            peerCount: peers.count,
+            sessionState: sessionState,
+            authenticationState: authenticatedSessionState,
+            contactState: contactWorkflowState,
+            capabilityState: capabilityExecutionState,
+            primaryHolonSelected: selected,
+            primaryHolonNeedsCredential: needsCredential,
+            primaryHolonCredentialConfigured: openAIAPIKeyConfigured
+        ))
+    }
+
+    public var reviewReadinessProgress: Double {
+        NearBridgeReviewReadiness.progress(for: reviewReadiness)
+    }
+
+    public var nextRecommendedAction: String {
+        NearBridgeReviewReadiness.nextAction(for: reviewReadiness)
+    }
+
+    public var sanitizedDiagnostics: String {
+        NearBridgeDiagnosticExport.make(
+            phase: phase,
+            role: role,
+            readiness: reviewReadiness,
+            receipt: lastExecutionReceipt,
+            events: events
+        )
+    }
+
+    public var connectedPeerName: String? { remoteHello?.displayName }
+
+    public var remoteFingerprint: String {
+        guard let nodeID = remoteHello?.nodeID else { return "not-yet-authenticated" }
+        return String(nodeID.prefix(12)).uppercased()
     }
 
     @discardableResult
@@ -368,6 +412,14 @@ public final class NearBridgeController: ObservableObject {
             pendingCapabilityInvocation = message
             capabilityExecutionState = .requestSent
             lastCapabilityOutput = nil
+            lastExecutionReceipt = NearBridgeExecutionReceipt(
+                invocationID: message.payload.capability?.invocationID ?? message.messageID,
+                capabilityID: message.payload.capability?.capabilityID ?? ContactDemoCapability.defaultCapabilityID,
+                providerLabel: remotePrimaryHolonDisclosure ?? "Authenticated Mac Primary Holon",
+                peerFingerprint: remoteFingerprint,
+                outcome: .requestSent,
+                integrity: "Signed request bound to the fresh session"
+            )
             sendCapabilityMessage(message, state: "invocationSent")
         } catch {
             capabilityExecutionState = .failed
@@ -626,6 +678,9 @@ public final class NearBridgeController: ObservableObject {
             )
         case .acknowledgement:
             if pendingAcknowledgements.remove(message.correlationID) != nil {
+                if lastExecutionReceipt?.resultMessageID == message.correlationID {
+                    lastExecutionReceipt?.acknowledgement = .received
+                }
                 record(category: .messageReceive, state: "acknowledged", peer: message.senderNodeID, message: message.messageID, detail: "Peer acknowledged message \(message.correlationID.uuidString)")
             } else {
                 record(category: .messageReceive, state: "unexpectedAcknowledgement", peer: message.senderNodeID, message: message.messageID, detail: "Acknowledgement has no pending local message")
@@ -638,10 +693,15 @@ public final class NearBridgeController: ObservableObject {
             )
         case .capabilityInvocation, .capabilityResult, .capabilityFailure:
             try receiveCapabilityMessage(message, identityManager: identityManager, sessionID: sessionID)
-            send(
-                try ReliableMessageCodec.makeAcknowledgement(for: message, sessionID: sessionID, identityManager: identityManager),
-                state: "acknowledged"
+            let acknowledgement = try ReliableMessageCodec.makeAcknowledgement(
+                for: message,
+                sessionID: sessionID,
+                identityManager: identityManager
             )
+            send(acknowledgement, state: "acknowledged")
+            if [.capabilityResult, .capabilityFailure].contains(message.messageType) {
+                lastExecutionReceipt?.acknowledgement = .sent
+            }
         }
     }
 
@@ -681,6 +741,7 @@ public final class NearBridgeController: ObservableObject {
             contactRequestMessage = message
         case .capabilityResponse:
             capabilityResponseMessage = message
+            remotePrimaryHolonDisclosure = message.payload.contact?.summary
         case .contactAccepted:
             contactAcceptanceMessage = message
         case .contactCompleted:
@@ -718,6 +779,14 @@ public final class NearBridgeController: ObservableObject {
             }
             activeHostCapabilityInvocationID = payload.invocationID
             capabilityExecutionState = .executing
+            lastExecutionReceipt = NearBridgeExecutionReceipt(
+                invocationID: payload.invocationID,
+                capabilityID: payload.capabilityID,
+                providerLabel: selectedPrimaryHolon?.displayName ?? "Selected Mac Primary Holon",
+                peerFingerprint: remoteFingerprint,
+                outcome: .executing,
+                integrity: "Accepted signed invocation after Host policy checks"
+            )
             record(category: .capability, state: "executing", peer: message.senderNodeID, message: message.messageID, detail: "Host authorized registered capability \(payload.capabilityID)")
             Task { [weak self] in
                 await self?.executeHostCapabilityInvocation(
@@ -739,6 +808,10 @@ public final class NearBridgeController: ObservableObject {
             pendingCapabilityInvocation = nil
             lastCapabilityOutput = payload.outputText
             capabilityExecutionState = message.messageType == .capabilityResult ? .succeeded : .failed
+            lastExecutionReceipt?.completedAt = Date()
+            lastExecutionReceipt?.outcome = message.messageType == .capabilityResult ? .succeeded : .failed
+            lastExecutionReceipt?.integrity = "Host signature, session, expiry, and correlation validated"
+            lastExecutionReceipt?.resultMessageID = message.messageID
             record(
                 category: .capability,
                 state: capabilityExecutionState.rawValue,
@@ -764,7 +837,10 @@ public final class NearBridgeController: ObservableObject {
             }
         }
         do {
-            let output = try await capabilityRegistry.execute(payload)
+            let output = try await capabilityRegistry.execute(
+                payload,
+                safetyIdentifier: NearBridgeSafetyIdentifier.forSession(sessionID)
+            )
             guard activeSessionID == sessionID,
                   authenticatedSessionState == .authenticated else {
                 capabilityExecutionState = .failed
@@ -780,6 +856,10 @@ public final class NearBridgeController: ObservableObject {
             )
             capabilityExecutionState = .succeeded
             lastCapabilityOutput = output
+            lastExecutionReceipt?.completedAt = Date()
+            lastExecutionReceipt?.outcome = .succeeded
+            lastExecutionReceipt?.integrity = "Host signed a typed result bound to the fresh session"
+            lastExecutionReceipt?.resultMessageID = result.messageID
             sendCapabilityMessage(result, state: "resultSent")
         } catch {
             guard activeSessionID == sessionID,
@@ -808,6 +888,10 @@ public final class NearBridgeController: ObservableObject {
             )
             capabilityExecutionState = .failed
             lastCapabilityOutput = reason
+            lastExecutionReceipt?.completedAt = Date()
+            lastExecutionReceipt?.outcome = .failed
+            lastExecutionReceipt?.integrity = "Host signed a bounded failure bound to the fresh session"
+            lastExecutionReceipt?.resultMessageID = failure.messageID
             sendCapabilityMessage(failure, state: "failureSent")
         } catch {
             record(category: .capability, state: "failureEncodingFailed", error: error, detail: error.localizedDescription)
@@ -872,6 +956,8 @@ public final class NearBridgeController: ObservableObject {
         activeHostCapabilityInvocationID = nil
         capabilityExecutionState = .idle
         lastCapabilityOutput = nil
+        remotePrimaryHolonDisclosure = nil
+        lastExecutionReceipt = nil
     }
 
     private func record(_ change: NearBridgeDiscoveryChange) {

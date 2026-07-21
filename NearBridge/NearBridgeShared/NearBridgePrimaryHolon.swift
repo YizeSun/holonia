@@ -48,9 +48,11 @@ public struct PrimaryHolonDescriptor: Codable, Equatable, Identifiable, Sendable
 
 public struct HolonTextRequest: Equatable, Sendable {
     public let text: String
+    public let safetyIdentifier: String?
 
-    public init(text: String) {
+    public init(text: String, safetyIdentifier: String? = nil) {
         self.text = text
+        self.safetyIdentifier = safetyIdentifier
     }
 }
 
@@ -168,7 +170,7 @@ public struct DeterministicDemoHolonAdapter: HolonAdapter {
     public init() {}
 
     public func execute(_ request: HolonTextRequest) async throws -> HolonTextResult {
-        let summary = try await LocalSummaryAgent().execute(input: request.text)
+        let summary = try await LocalSummaryAgent().execute(input: request.text, safetyIdentifier: request.safetyIdentifier)
         return HolonTextResult(text: summary)
     }
 }
@@ -257,7 +259,8 @@ public struct OpenAIModelOnlyHolonAdapter: HolonAdapter {
             prompt: input,
             apiKey: apiKey,
             maximumOutputCharacters: descriptor.capability.maximumOutputCharacters,
-            maximumResponseTokens: 2_048
+            maximumResponseTokens: 2_048,
+            safetyIdentifier: request.safetyIdentifier ?? NearBridgeSafetyIdentifier.forSession("unattributed-preview")
         ))
         guard response.text.count <= descriptor.capability.maximumOutputCharacters else {
             throw CapabilityError.outputTooLarge

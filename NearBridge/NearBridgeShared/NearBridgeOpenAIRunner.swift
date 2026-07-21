@@ -29,17 +29,20 @@ public struct RemoteModelRequest: Codable, Equatable, Sendable {
     public let apiKey: String
     public let maximumOutputCharacters: Int
     public let maximumResponseTokens: Int
+    public let safetyIdentifier: String
 
     public init(
         prompt: String,
         apiKey: String,
         maximumOutputCharacters: Int,
-        maximumResponseTokens: Int
+        maximumResponseTokens: Int,
+        safetyIdentifier: String = NearBridgeSafetyIdentifier.forSession("unit-preview")
     ) {
         self.prompt = prompt
         self.apiKey = apiKey
         self.maximumOutputCharacters = maximumOutputCharacters
         self.maximumResponseTokens = maximumResponseTokens
+        self.safetyIdentifier = safetyIdentifier
     }
 
     public func validate() throws {
@@ -54,6 +57,10 @@ public struct RemoteModelRequest: Codable, Equatable, Sendable {
         }
         guard (1...4_000).contains(maximumOutputCharacters),
               (1...2_048).contains(maximumResponseTokens) else {
+            throw RemoteModelRunnerError.invalidRequest
+        }
+        guard (3...64).contains(safetyIdentifier.count),
+              safetyIdentifier.unicodeScalars.allSatisfy({ (33...126).contains($0.value) }) else {
             throw RemoteModelRunnerError.invalidRequest
         }
     }
@@ -252,7 +259,7 @@ public struct OpenAIResponsesClient: Sendable {
         return RemoteModelResponse(
             text: text,
             model: decoded.model ?? Self.model,
-            runtimeDisclosure: "OpenAI Responses API · model-only · store: false · tools: omitted"
+            runtimeDisclosure: "OpenAI Responses API · model-only · store: false · tools: omitted · session safety identifier"
         )
     }
 
@@ -263,7 +270,8 @@ public struct OpenAIResponsesClient: Sendable {
             instructions: "Answer the user's plain-text question directly and concisely. You have no files, workspace, commands, tools, device control, or persistent memory. Never claim that you used any of them.",
             input: request.prompt,
             maximumOutputTokens: request.maximumResponseTokens,
-            store: false
+            store: false,
+            safetyIdentifier: request.safetyIdentifier
         )
         var urlRequest = URLRequest(url: Self.endpoint)
         urlRequest.httpMethod = "POST"
@@ -281,6 +289,7 @@ private struct OpenAIRequestBody: Encodable {
     let input: String
     let maximumOutputTokens: Int
     let store: Bool
+    let safetyIdentifier: String
 
     enum CodingKeys: String, CodingKey {
         case model
@@ -288,6 +297,7 @@ private struct OpenAIRequestBody: Encodable {
         case input
         case maximumOutputTokens = "max_output_tokens"
         case store
+        case safetyIdentifier = "safety_identifier"
     }
 }
 

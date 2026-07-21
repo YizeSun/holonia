@@ -2,7 +2,20 @@
 
 Holonia 是一个面向人、Agent 与组织的能力发现和工作连接网络。它让一个主体在自身能力不足时，可以寻找其他能力、建立私密联系，并在适合的专业网络中完成委托、交付与验收。
 
-项目当前处于概念固定与 NearBridge 通用 Primary Holon 平台验证期，尚未冻结公开协议。NearBridge `NB-0` 的普通 Wi-Fi 真机核心路径已经跑通，`NB-1` 到 `NB-5` 的最终集成纵向链路已有真实 iPhone/Mac 证据；`NB-6` 的 Mac Primary Holon Implementation 选择、统一 Holon adapter 和 Apple 设备端 NaturalLanguage model 也已完成自动化、双目标构建和单一设备对上的真机核心路径。`NB-7` 建立带版本的 manifest、capability registry 和 execution profile；`NB-8` 增加嵌入 Mac App、默认无文件/命令/网络接口的 app-sandboxed Apple Foundation Models XPC runner；`NB-9` 增加由 Mac Host 明确选择、以 Keychain 凭据调用固定 OpenAI Responses API 模型的 model-only adapter。NB-9 已在一台真实 iPhone 与一台 Mac 上完成问题、受限模型调用、签名结果显示和 acknowledgement 主路径；错误、重复性、多设备和生命周期矩阵仍未完成，当前不是生产就绪版本。
+项目当前处于概念固定与 NearBridge 通用 Primary Holon 平台验证期，尚未冻结公开协议。NearBridge `NB-0` 的普通 Wi-Fi 真机核心路径已经跑通，`NB-1` 到 `NB-5` 的最终集成纵向链路已有真实 iPhone/Mac 证据；`NB-6` 的 Mac Primary Holon Implementation 选择、统一 Holon adapter 和 Apple 设备端 NaturalLanguage model 也已完成自动化、双目标构建和单一设备对上的真机核心路径。`NB-7` 建立带版本的 manifest、capability registry 和 execution profile；`NB-8` 增加嵌入 Mac App、默认无文件/命令/网络接口的 app-sandboxed Apple Foundation Models XPC runner；`NB-9` 增加由 Mac Host 明确选择、以 Keychain 凭据调用固定 OpenAI Responses API 模型的 model-only adapter。NB-9 已在一台真实 iPhone 与一台 Mac 上完成问题、受限模型调用、签名结果显示和 acknowledgement 主路径。Build Week `P0/P1 Review Readiness` 把同一纵向链路整理为评审可读的 Demo/Diagnostics 双视图，加入 readiness、示例问题、签名执行回执、安全诊断导出和 OpenAI safety identifier；它不占用路线图中预留给第三方 adapter 准入的 `NB-10`。其自动化与构建状态记录在 checkpoint 文档中，新的真机 UI 尚待观察。错误、重复性、多设备和生命周期矩阵仍未完成，当前不是生产就绪版本。
+
+## OpenAI Build Week 2026
+
+本仓库首个 commit 是 2026-07-17，NearBridge 是在 Build Week 期间为本次活动构建的项目。建议提交赛道为 **Apps for Your Life**：它让 iPhone 用户在同一局域网内明确选择、认证并调用 Mac 上更强但受限的 Primary Holon，然后收到签名、相关联、可审计的答案。
+
+- **GPT-5.6 的实际产品角色**：Mac 上的 `OpenAIModelOnlyHolonAdapter` 通过固定 Responses API 请求回答 iPhone 的纯文本问题；请求 `store: false`、不携带 tools，并受输入/输出上限约束。
+- **Codex 的构建角色**：用于需求拆解、Apple 网络与认证实现、SwiftUI、XPC 隔离、安全收敛、测试、真机故障诊断和评审文档。提交时需要在 Devpost 的 `/feedback` 命令中提供对应 Codex Session ID。
+- **快速评审**：[Build Week reviewer runbook](docs/build-week/reviewer-runbook.md)
+- **英文提交草稿**：[Build Week submission draft](docs/build-week/submission-draft.md)
+- **评测与失败矩阵**：[Build Week evaluation plan](docs/build-week/evaluation-plan.md)
+- **最后阶段视频 TODO**：[Build Week video production TODO](docs/build-week/video-production-todo.md)
+
+API key 不在仓库中。评审者可以选用 Apple 设备端或 deterministic adapter 观察无 key 路径，也可以在 Mac App 中自行将测试 key 保存到 Keychain，以复现真实 GPT-5.6 路径。
 
 ## 已确定的命名关系
 
@@ -25,6 +38,7 @@ Holonia 是一个面向人、Agent 与组织的能力发现和工作连接网络
 - [NearBridge NB-7 通用 Holon contract checkpoint](docs/nearbridge/nb7-results.md)
 - [NearBridge NB-8 隔离本地模型 runner checkpoint](docs/nearbridge/nb8-results.md)
 - [NearBridge NB-9 OpenAI model-only checkpoint](docs/nearbridge/nb9-results.md)
+- [Build Week P0/P1 demo/review readiness checkpoint](docs/nearbridge/build-week-p0-p1-results.md)
 - [NearBridge 延期验证 TODO](docs/nearbridge/deferred-validation-todo.md)
 - [小型代码任务网络计划](docs/code-network-plan.md)
 - [开放问题和后续决策](docs/open-questions.md)

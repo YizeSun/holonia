@@ -41,6 +41,7 @@ final class NearBridgeOpenAIRunnerTests: XCTestCase {
         XCTAssertEqual(json["input"] as? String, "What can NearBridge do?")
         XCTAssertEqual(json["store"] as? Bool, false)
         XCTAssertEqual(json["max_output_tokens"] as? Int, 2_048)
+        XCTAssertEqual(json["safety_identifier"] as? String, request.safetyIdentifier)
         XCTAssertNil(json["tools"])
         XCTAssertFalse(String(data: body, encoding: .utf8)?.contains(apiKey) ?? true)
     }

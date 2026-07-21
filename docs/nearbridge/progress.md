@@ -23,6 +23,7 @@
 | NB-7 | 实现完成 | 37/37 测试通过；macOS 与通用 iOS Device SDK 构建通过 | 未运行 | 未运行 | [`nb7-results.md`](nb7-results.md) |
 | NB-8 | 实现完成 | 39/39 测试通过；macOS 与通用 iOS Device SDK 构建通过；Mac bundle XPC 嵌入检查通过 | 未运行 | 未运行 | [`nb8-results.md`](nb8-results.md) |
 | NB-9 | 核心路径完成 | 50/50 测试通过；macOS 与通用 iOS Device SDK 构建通过；Mac bundle 双 XPC 注册/嵌入检查通过 | 未运行 | OpenAI model-only 跨设备回答主路径通过；错误/稳定性/多设备矩阵待验证 | [`nb9-results.md`](nb9-results.md) |
+| Build Week P0/P1 | 自动化 checkpoint | 54/54 测试通过；macOS 与通用 iOS Device SDK 构建通过；Mac bundle 双 XPC 嵌入确认 | 未运行 | Demo/Diagnostics、readiness、执行回执、净化导出和 Build Week 评审材料已实现 | [`build-week-p0-p1-results.md`](build-week-p0-p1-results.md) |
 
 2026-07-21 的集成真机结果记录在 [`physical-validation-2026-07-21.md`](physical-validation-2026-07-21.md)。它基于 `68ee156` 的实现和随后由 `2c76865` 固化的 Mac Apple development signing 配置；它不是五个历史 checkpoint 的逐一安装测试。
 
@@ -43,3 +44,5 @@ NB-7 只建立通用平台 contract：版本化 `HolonManifest`、capability reg
 NB-8 已把 Apple Foundation Models adapter 放入嵌入 Mac App 的独立 XPC service，并通过源 entitlement、协议边界、超时、单一在途调用与 session 失效丢弃策略限制执行。39/39 测试、两目标无签名构建和产物嵌入检查通过；这些证据不能替代签名后的 entitlement 检查、运行时进程观察或真实 iPhone 发起的生成结果。
 
 NB-9 已加入固定 OpenAI Responses API 的 model-only adapter、Host Keychain 凭据管理、只允许出站网络的独立 XPC、redirect 拒绝、`store: false` 和 omitted tools。50/50 测试、两目标无签名构建和双 XPC 注册/嵌入检查通过；修复 XPC registration 后，一个真实 iPhone/Mac 设备对已观察到 question、真实 model-only answer、signed result、iPhone 显示和 acknowledgement。缺失/无效 key、离线、401/403、429、provider failure、重复、延迟/用量、session 丢失和多设备矩阵仍待验证。
+
+Build Week P0/P1 不增加网络或 Agent 权限，也不占用已规划的 NB-10；它把纵向路径重组为评审默认 Demo 与详细 Diagnostics，增加下一步引导、示例问题、signed execution receipt、净化导出和 OpenAI privacy-preserving session safety identifier。共享测试已增至 54 项并通过，macOS 与通用 iOS Device SDK 构建成功，Mac bundle 嵌入两个 XPC；新的 UI/回执/导出必须在真机观察后才能升级物理状态。
