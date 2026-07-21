@@ -7,7 +7,7 @@ correlated result.
 
 [Watch the 2:50 physical-device demo](https://youtu.be/4s-6gypJUYA) ·
 [Reviewer runbook](docs/build-week/reviewer-runbook.md) ·
-[Validation evidence](docs/nearbridge/progress.md)
+[Validation evidence](docs/build-week/validation-evidence.md)
 
 > **Experimental checkpoint:** one real iPhone/Mac pair has completed the
 > Build Week happy path. NearBridge is not production-ready and does not claim
@@ -246,9 +246,9 @@ At the Build Week review checkpoint:
   authentication, contact, a real model answer, signed delivery,
   acknowledgement, correlated receipts, and sanitized export.
 
-See the [validation table](docs/nearbridge/progress.md),
-[NB-9 results](docs/nearbridge/nb9-results.md), and
-[Build Week P0/P1 results](docs/nearbridge/build-week-p0-p1-results.md).
+See the [English validation evidence](docs/build-week/validation-evidence.md),
+[reviewer runbook](docs/build-week/reviewer-runbook.md), and
+[evaluation plan](docs/build-week/evaluation-plan.md).
 
 ## Current limitations
 
@@ -284,14 +284,9 @@ to later Holonia phases, not the current NearBridge checkpoint.
 ## NearBridge documentation
 
 - [Build Week reviewer runbook](docs/build-week/reviewer-runbook.md)
-- [NearBridge validation status](docs/nearbridge/progress.md)
-- [NearBridge implementation plan](docs/nearbridge-plan.md)
-- [NB-9 physical-model checkpoint](docs/nearbridge/nb9-results.md)
+- [NearBridge validation evidence](docs/build-week/validation-evidence.md)
 - [Build Week evaluation plan](docs/build-week/evaluation-plan.md)
-- [Deferred validation and capability work](docs/nearbridge/deferred-validation-todo.md)
-
-For the longer-term context beyond NearBridge, see the
-[Holonia roadmap](docs/roadmap.md).
+- [Build Week submission narrative](docs/build-week/submission-draft.md)
 
 ## Licensing
 
