@@ -18,7 +18,7 @@ NearBridge 第一阶段只回答一个问题：
 - `NB-4` 已完成实现与自动化验证：Request → Capability Response → Contact Accepted → Completed 的签名联系状态机；不调用 Agent 或远程操作。
 - `NB-5` 已完成实现与自动化验证：iPhone 可在完成联系流程后调用 Mac Host 明确注册的 deterministic text-summary Agent，并接收签名 typed result；没有任意命令、文件、云或动态工具入口。
 - `NB-1 → NB-5` 的最终集成主路径已在真实 iPhone/Mac 上完成；延期环境、生命周期和边界矩阵仍未执行，所以尚不能称为稳定或生产就绪。
-- `NB-6` 已完成实现与自动化验证：Mac 用户可选择并持久化一个编译时 allowlisted Primary Holon Implementation，统一 `HolonAdapter` 后有 Apple 设备端 NaturalLanguage real-model option 和 deterministic fallback；NB-6 真机验证待执行。
+- `NB-6` 已完成实现与自动化验证，并在真实 iPhone/Mac 上跑通 Apple NaturalLanguage 核心路径：Mac 选择编译时 allowlisted Primary Holon Implementation，iPhone 通过统一 `HolonAdapter` facade 调用，Mac 返回 signed real-model result；持久化、adapter 切换和边界矩阵待执行。
 - 每个 `NB` 都使用独立 Git commit 和远端 checkpoint；自动化、模拟器与真机证据分别记录，后续修复添加新 commit，不改写已测试 checkpoint。
 - 不阻塞主线的权限、生命周期、网络环境和候选技术补测记录在 [`nearbridge/deferred-validation-todo.md`](nearbridge/deferred-validation-todo.md)。
 

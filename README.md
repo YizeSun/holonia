@@ -2,7 +2,7 @@
 
 Holonia 是一个面向人、Agent 与组织的能力发现和工作连接网络。它让一个主体在自身能力不足时，可以寻找其他能力、建立私密联系，并在适合的专业网络中完成委托、交付与验收。
 
-项目当前处于概念固定与 NearBridge 第一阶段实现期，尚未冻结公开协议。NearBridge `NB-0` 的普通 Wi-Fi 真机核心路径已经跑通，`NB-1` 到 `NB-5` 的最终集成纵向链路已有真实 iPhone/Mac 证据；`NB-6` 已增加 Mac 本地 Primary Holon Implementation 选择、统一 Holon adapter 和 Apple 设备端 NaturalLanguage model，自动化与双目标构建通过，但 NB-6 真机验证尚未运行。当前是实验性 feature checkpoint，不是生产就绪版本。
+项目当前处于概念固定与 NearBridge 第一阶段实现期，尚未冻结公开协议。NearBridge `NB-0` 的普通 Wi-Fi 真机核心路径已经跑通，`NB-1` 到 `NB-5` 的最终集成纵向链路已有真实 iPhone/Mac 证据；`NB-6` 的 Mac Primary Holon Implementation 选择、统一 Holon adapter 和 Apple 设备端 NaturalLanguage model 也已完成自动化、双目标构建和单一设备对上的真机核心路径。延期边界与稳定性矩阵仍未完成，当前不是生产就绪版本。
 
 ## 已确定的命名关系
 

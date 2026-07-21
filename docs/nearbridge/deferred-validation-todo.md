@@ -57,7 +57,8 @@
 
 ## 7. NB-6 Primary Holon 补充证据
 
-- [ ] 从 NB-6 commit 在真实 Mac/iPhone 上确认 Apple NaturalLanguage Primary Holon 跨设备调用成功。
+- [x] 从 NB-6 commit 在真实 Mac/iPhone 上确认 Apple NaturalLanguage Primary Holon 跨设备调用成功。
+  - 2026-07-21：Mac `AppleNaturalLanguageHolonAdapter` 与 iPhone 均显示 `Execution: succeeded` 和相同 `language: en (99%) · sentiment: negative (-0.60)` 结果；Mac 记录 signed result 与 acknowledgement。详见 [`physical-validation-nb6-2026-07-21.md`](physical-validation-nb6-2026-07-21.md)。
 - [ ] 关闭并重新打开 Mac App，确认 Primary Holon Implementation 选择持久化。
 - [ ] 活动连接期间确认 Picker 锁定，断开后才允许切换 adapter。
 - [ ] 切换 deterministic fallback、重新联系并确认执行结果来自新 adapter。
