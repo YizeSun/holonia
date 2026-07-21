@@ -77,6 +77,15 @@
 5. `Observed`、`Simulated`、`Code-inspected` 或 `Not tested` 分类；
 6. 是否产生需要回到主线修复的问题。
 
+## 8.1 NB-8 隔离本地模型 runner 补充证据
+
+- [ ] 从 NB-8 commit 构建并运行签名 Mac App，确认嵌入的 `NearBridgeModelRunner.xpc` 能启动。
+- [ ] 用 `codesign` 检查实际 Mac App 与 XPC entitlement，确认 runner 只有 App Sandbox，未获得 network client/server、用户文件或临时文件例外。
+- [ ] 真实 iPhone 发起普通文本请求，确认 Mac XPC 执行 Apple Foundation Models，iPhone 收到并显示 signed typed answer。
+- [ ] 保存两端结构化诊断截图，区分 Host 接受、runner 开始/完成、signed result 和 acknowledgement。
+- [ ] 运行空输入、1,201 字符、重复点击、runner timeout 以及认证会话提前断开的拒绝/丢弃路径。
+- [ ] 用运行时网络观察确认本地 runner 不产生网络连接；源码 entitlement 检查不能替代这项证据。
+
 ## 9. 通用 Primary Holon 平台后续功能 TODO
 
 以下不是稳定性补测，而是明确尚未实现的产品/安全层。保存在这里是为了防止当前 model-only 平台被误解为已经拥有 Codex 工具权限。

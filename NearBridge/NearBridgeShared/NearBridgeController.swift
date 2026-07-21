@@ -54,6 +54,7 @@ public final class NearBridgeController: ObservableObject {
     private var capabilityResponseMessage: NearBridgeReliableMessage?
     private var contactAcceptanceMessage: NearBridgeReliableMessage?
     private var pendingCapabilityInvocation: NearBridgeReliableMessage?
+    private var activeHostCapabilityInvocationID: UUID?
     private let logger = Logger(subsystem: "org.holonia.nearbridge.v0", category: "authenticated-session")
 
     public init(role: DeviceRole) {
@@ -217,7 +218,7 @@ public final class NearBridgeController: ObservableObject {
 
     public func startContactRequest() {
         guard role == .iPhone else {
-            record(category: .workflow, state: "requestRejected", detail: "NB-6 contact requests originate on the iPhone")
+            record(category: .workflow, state: "requestRejected", detail: "Primary Holon contact requests originate on the iPhone")
             return
         }
         guard contactWorkflow.state == .idle else { return }
@@ -238,7 +239,7 @@ public final class NearBridgeController: ObservableObject {
 
     public func sendCapabilityResponse() {
         guard role == .mac else {
-            record(category: .workflow, state: "responseRejected", detail: "Only the Mac Host can offer the NB-6 Primary Holon capability")
+            record(category: .workflow, state: "responseRejected", detail: "Only the Mac Host can offer the selected Primary Holon capability")
             return
         }
         guard contactWorkflow.state == .requestReceived, let request = contactRequestMessage else { return }
@@ -287,7 +288,7 @@ public final class NearBridgeController: ObservableObject {
 
     public func completeContact() {
         guard role == .mac else {
-            record(category: .workflow, state: "completionRejected", detail: "The Mac capability provider completes the NB-6 contact")
+            record(category: .workflow, state: "completionRejected", detail: "The Mac capability provider completes the Primary Holon contact")
             return
         }
         guard contactWorkflow.state == .acceptanceReceived, let acceptance = contactAcceptanceMessage else { return }
@@ -316,7 +317,7 @@ public final class NearBridgeController: ObservableObject {
             let context = try authenticatedContext()
             let message = try ReliableMessageCodec.makeCapabilityInvocation(
                 input: normalized,
-                capabilityID: ContactDemoCapability.primaryHolonTextInsight,
+                capabilityID: contactWorkflow.capabilityID ?? ContactDemoCapability.defaultCapabilityID,
                 sessionID: context.sessionID,
                 identityManager: context.identity
             )
@@ -668,21 +669,20 @@ public final class NearBridgeController: ObservableObject {
                 sendCapabilityFailure(for: message, reason: "Contact workflow is not completed", identityManager: identityManager, sessionID: sessionID)
                 return
             }
+            guard activeHostCapabilityInvocationID == nil else {
+                sendCapabilityFailure(for: message, reason: "The Host is already executing one capability request", identityManager: identityManager, sessionID: sessionID)
+                return
+            }
+            activeHostCapabilityInvocationID = payload.invocationID
             capabilityExecutionState = .executing
             record(category: .capability, state: "executing", peer: message.senderNodeID, message: message.messageID, detail: "Host authorized registered capability \(payload.capabilityID)")
-            do {
-                let output = try capabilityRegistry.execute(payload)
-                let result = try ReliableMessageCodec.makeCapabilityResult(
-                    for: message,
-                    output: output,
-                    sessionID: sessionID,
-                    identityManager: identityManager
+            Task { [weak self] in
+                await self?.executeHostCapabilityInvocation(
+                    message,
+                    payload: payload,
+                    identityManager: identityManager,
+                    sessionID: sessionID
                 )
-                capabilityExecutionState = .succeeded
-                lastCapabilityOutput = output
-                sendCapabilityMessage(result, state: "resultSent")
-            } catch {
-                sendCapabilityFailure(for: message, reason: "Host policy rejected the registered capability request", identityManager: identityManager, sessionID: sessionID)
             }
 
         case .capabilityResult, .capabilityFailure:
@@ -706,6 +706,47 @@ public final class NearBridgeController: ObservableObject {
 
         case .ping, .pong, .acknowledgement, .contactRequest, .capabilityResponse, .contactAccepted, .contactCompleted:
             throw CapabilityError.invalidMessage
+        }
+    }
+
+    private func executeHostCapabilityInvocation(
+        _ message: NearBridgeReliableMessage,
+        payload: CapabilityMessagePayload,
+        identityManager: HostIdentityManager,
+        sessionID: String
+    ) async {
+        defer {
+            if activeHostCapabilityInvocationID == payload.invocationID {
+                activeHostCapabilityInvocationID = nil
+            }
+        }
+        do {
+            let output = try await capabilityRegistry.execute(payload)
+            guard activeSessionID == sessionID,
+                  authenticatedSessionState == .authenticated else {
+                capabilityExecutionState = .failed
+                lastCapabilityOutput = "The authenticated session ended before the result was returned"
+                record(category: .capability, state: "resultDiscarded", peer: message.senderNodeID, message: message.messageID, detail: "Discarded model output after the authenticated session ended")
+                return
+            }
+            let result = try ReliableMessageCodec.makeCapabilityResult(
+                for: message,
+                output: output,
+                sessionID: sessionID,
+                identityManager: identityManager
+            )
+            capabilityExecutionState = .succeeded
+            lastCapabilityOutput = output
+            sendCapabilityMessage(result, state: "resultSent")
+        } catch {
+            guard activeSessionID == sessionID,
+                  authenticatedSessionState == .authenticated else { return }
+            sendCapabilityFailure(
+                for: message,
+                reason: error.localizedDescription,
+                identityManager: identityManager,
+                sessionID: sessionID
+            )
         }
     }
 
@@ -785,6 +826,7 @@ public final class NearBridgeController: ObservableObject {
         capabilityResponseMessage = nil
         contactAcceptanceMessage = nil
         pendingCapabilityInvocation = nil
+        activeHostCapabilityInvocationID = nil
         capabilityExecutionState = .idle
         lastCapabilityOutput = nil
     }

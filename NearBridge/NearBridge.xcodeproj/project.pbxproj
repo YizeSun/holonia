@@ -11,7 +11,34 @@
 		A10000000000000000000002 /* NearBridgeMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* NearBridgeMacApp.swift */; };
 		A10000000000000000000003 /* NearBridgeShared in Frameworks */ = {isa = PBXBuildFile; productRef = A80000000000000000000001 /* NearBridgeShared */; };
 		A10000000000000000000004 /* NearBridgeShared in Frameworks */ = {isa = PBXBuildFile; productRef = A80000000000000000000002 /* NearBridgeShared */; };
+		A10000000000000000000005 /* ModelRunnerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000007 /* ModelRunnerService.swift */; };
+		A10000000000000000000006 /* NearBridgeShared in Frameworks */ = {isa = PBXBuildFile; productRef = A80000000000000000000004 /* NearBridgeShared */; };
+		A10000000000000000000007 /* NearBridgeModelRunner.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000A /* NearBridgeModelRunner.xpc */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		AC0000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A60000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A50000000000000000000003;
+			remoteInfo = NearBridgeModelRunner;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A90000000000000000000007 /* Embed XPC Services */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/XPCServices;
+			dstSubfolderSpec = 1;
+			files = (
+				A10000000000000000000007 /* NearBridgeModelRunner.xpc in Embed XPC Services */,
+			);
+			name = "Embed XPC Services";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		A20000000000000000000001 /* NearBridgeIOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NearBridgeIOSApp.swift; sourceTree = "<group>"; };
@@ -20,6 +47,10 @@
 		A20000000000000000000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A20000000000000000000005 /* NearBridgeIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NearBridgeIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20000000000000000000006 /* NearBridgeMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NearBridgeMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A20000000000000000000007 /* ModelRunnerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelRunnerService.swift; sourceTree = "<group>"; };
+		A20000000000000000000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A20000000000000000000009 /* NearBridgeModelRunner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NearBridgeModelRunner.entitlements; sourceTree = "<group>"; };
+		A2000000000000000000000A /* NearBridgeModelRunner.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = NearBridgeModelRunner.xpc; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +70,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A30000000000000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000006 /* NearBridgeShared in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -47,6 +86,7 @@
 			children = (
 				A40000000000000000000002 /* NearBridgeIOS */,
 				A40000000000000000000003 /* NearBridgeMac */,
+				A40000000000000000000005 /* NearBridgeModelRunner */,
 				A40000000000000000000004 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -74,8 +114,19 @@
 			children = (
 				A20000000000000000000005 /* NearBridgeIOS.app */,
 				A20000000000000000000006 /* NearBridgeMac.app */,
+				A2000000000000000000000A /* NearBridgeModelRunner.xpc */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		A40000000000000000000005 /* NearBridgeModelRunner */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000007 /* ModelRunnerService.swift */,
+				A20000000000000000000008 /* Info.plist */,
+				A20000000000000000000009 /* NearBridgeModelRunner.entitlements */,
+			);
+			path = NearBridgeModelRunner;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -108,10 +159,12 @@
 				A30000000000000000000002 /* Frameworks */,
 				A90000000000000000000002 /* Sources */,
 				A90000000000000000000004 /* Resources */,
+				A90000000000000000000007 /* Embed XPC Services */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				AD0000000000000000000001 /* PBXTargetDependency */,
 			);
 			name = NearBridgeMac;
 			packageProductDependencies = (
@@ -120,6 +173,26 @@
 			productName = NearBridgeMac;
 			productReference = A20000000000000000000006 /* NearBridgeMac.app */;
 			productType = "com.apple.product-type.application";
+		};
+		A50000000000000000000003 /* NearBridgeModelRunner */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A70000000000000000000004 /* Build configuration list for PBXNativeTarget "NearBridgeModelRunner" */;
+			buildPhases = (
+				A30000000000000000000003 /* Frameworks */,
+				A90000000000000000000006 /* Sources */,
+				A90000000000000000000005 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NearBridgeModelRunner;
+			packageProductDependencies = (
+				A80000000000000000000004 /* NearBridgeShared */,
+			);
+			productName = NearBridgeModelRunner;
+			productReference = A2000000000000000000000A /* NearBridgeModelRunner.xpc */;
+			productType = "com.apple.product-type.xpc-service";
 		};
 /* End PBXNativeTarget section */
 
@@ -135,6 +208,9 @@
 						CreatedOnToolsVersion = 26.5;
 					};
 					A50000000000000000000002 = {
+						CreatedOnToolsVersion = 26.5;
+					};
+					A50000000000000000000003 = {
 						CreatedOnToolsVersion = 26.5;
 					};
 				};
@@ -157,6 +233,7 @@
 			targets = (
 				A50000000000000000000001 /* NearBridgeIOS */,
 				A50000000000000000000002 /* NearBridgeMac */,
+				A50000000000000000000003 /* NearBridgeModelRunner */,
 			);
 		};
 /* End PBXProject section */
@@ -170,6 +247,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		A90000000000000000000004 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A90000000000000000000005 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -195,7 +279,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A90000000000000000000006 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000005 /* ModelRunnerService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AD0000000000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A50000000000000000000003 /* NearBridgeModelRunner */;
+			targetProxy = AC0000000000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		B10000000000000000000001 /* Debug */ = {
@@ -220,12 +320,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = ZMN7LG4SD9;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = NearBridgeIOS/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.7.0;
+				MARKETING_VERSION = 0.8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.holonia.nearbridge.nb0.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -243,12 +343,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = ZMN7LG4SD9;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = NearBridgeIOS/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.7.0;
+				MARKETING_VERSION = 0.8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.holonia.nearbridge.nb0.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -266,12 +366,12 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = ZMN7LG4SD9;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = NearBridgeMac/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.7.0;
+				MARKETING_VERSION = 0.8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.holonia.nearbridge.nb0.mac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -285,15 +385,55 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = ZMN7LG4SD9;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = NearBridgeMac/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.7.0;
+				MARKETING_VERSION = 0.8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.holonia.nearbridge.nb0.mac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		B10000000000000000000007 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = NearBridgeModelRunner/NearBridgeModelRunner.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 8;
+				DEVELOPMENT_TEAM = ZMN7LG4SD9;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = NearBridgeModelRunner/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.8.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.holonia.nearbridge.model-runner;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		B10000000000000000000008 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = NearBridgeModelRunner/NearBridgeModelRunner.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 8;
+				DEVELOPMENT_TEAM = ZMN7LG4SD9;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = NearBridgeModelRunner/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.8.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.holonia.nearbridge.model-runner;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_VERSION = 5.0;
 			};
@@ -329,6 +469,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		A70000000000000000000004 /* Build configuration list for PBXNativeTarget "NearBridgeModelRunner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B10000000000000000000007 /* Debug */,
+				B10000000000000000000008 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -345,6 +494,11 @@
 			productName = NearBridgeShared;
 		};
 		A80000000000000000000002 /* NearBridgeShared */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A80000000000000000000003 /* XCLocalSwiftPackageReference "." */;
+			productName = NearBridgeShared;
+		};
+		A80000000000000000000004 /* NearBridgeShared */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = A80000000000000000000003 /* XCLocalSwiftPackageReference "." */;
 			productName = NearBridgeShared;

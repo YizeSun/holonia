@@ -84,9 +84,9 @@ public enum CapabilityError: Error, Equatable, LocalizedError {
     }
 }
 
-protocol NearBridgeCapabilityHandler {
+protocol NearBridgeCapabilityHandler: Sendable {
     var descriptor: NearBridgeCapabilityDescriptor { get }
-    func execute(input: String) throws -> String
+    func execute(input: String) async throws -> String
 }
 
 struct PrimaryHolonCapabilityHandler: NearBridgeCapabilityHandler {
@@ -94,8 +94,8 @@ struct PrimaryHolonCapabilityHandler: NearBridgeCapabilityHandler {
 
     var descriptor: NearBridgeCapabilityDescriptor { adapter.descriptor.capability }
 
-    func execute(input: String) throws -> String {
-        try adapter.execute(HolonTextRequest(text: input)).text
+    func execute(input: String) async throws -> String {
+        try await adapter.execute(HolonTextRequest(text: input)).text
     }
 }
 
@@ -108,7 +108,7 @@ struct LocalSummaryAgent: NearBridgeCapabilityHandler {
         maximumOutputCharacters: 280
     )
 
-    func execute(input: String) throws -> String {
+    func execute(input: String) async throws -> String {
         let normalized = input.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalized.isEmpty else { throw CapabilityError.invalidInput }
         guard normalized.count <= descriptor.maximumInputCharacters else { throw CapabilityError.inputTooLarge }
@@ -150,13 +150,13 @@ struct NearBridgeCapabilityRegistry {
         handlers.values.map(\.descriptor).sorted { $0.capabilityID < $1.capabilityID }
     }
 
-    func execute(_ payload: CapabilityMessagePayload) throws -> String {
+    func execute(_ payload: CapabilityMessagePayload) async throws -> String {
         guard payload.status == .requested, payload.outputText == nil, let input = payload.inputText else {
             throw CapabilityError.invalidMessage
         }
         guard let handler = handlers[payload.capabilityID] else { throw CapabilityError.notRegistered }
         guard input.count <= handler.descriptor.maximumInputCharacters else { throw CapabilityError.inputTooLarge }
-        let output = try handler.execute(input: input)
+        let output = try await handler.execute(input: input)
         guard output.count <= handler.descriptor.maximumOutputCharacters else { throw CapabilityError.outputTooLarge }
         return output
     }

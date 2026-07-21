@@ -2,7 +2,7 @@ import XCTest
 @testable import NearBridgeShared
 
 final class NearBridgeCapabilityTests: XCTestCase {
-    func testMacRegistryContainsOnlyExplicitSummaryCapability() throws {
+    func testMacRegistryContainsOnlyExplicitSummaryCapability() async throws {
         let registry = NearBridgeCapabilityRegistry.macNB5()
         XCTAssertEqual(registry.descriptors.map(\.capabilityID), [ContactDemoCapability.textSummarization])
 
@@ -13,13 +13,11 @@ final class NearBridgeCapabilityTests: XCTestCase {
             outputText: nil,
             status: .requested
         )
-        XCTAssertEqual(
-            try registry.execute(payload),
-            "First sentence explains the input. Second sentence adds context"
-        )
+        let output = try await registry.execute(payload)
+        XCTAssertEqual(output, "First sentence explains the input. Second sentence adds context")
     }
 
-    func testUnregisteredCapabilityAndOversizedInputAreRejected() {
+    func testUnregisteredCapabilityAndOversizedInputAreRejected() async {
         let registry = NearBridgeCapabilityRegistry.macNB5()
         let unknown = CapabilityMessagePayload(
             invocationID: UUID(),
@@ -28,8 +26,11 @@ final class NearBridgeCapabilityTests: XCTestCase {
             outputText: nil,
             status: .requested
         )
-        XCTAssertThrowsError(try registry.execute(unknown)) {
-            XCTAssertEqual($0 as? CapabilityError, .notRegistered)
+        do {
+            _ = try await registry.execute(unknown)
+            XCTFail("Expected an unregistered capability error")
+        } catch {
+            XCTAssertEqual(error as? CapabilityError, .notRegistered)
         }
 
         let oversized = CapabilityMessagePayload(
@@ -39,12 +40,15 @@ final class NearBridgeCapabilityTests: XCTestCase {
             outputText: nil,
             status: .requested
         )
-        XCTAssertThrowsError(try registry.execute(oversized)) {
-            XCTAssertEqual($0 as? CapabilityError, .inputTooLarge)
+        do {
+            _ = try await registry.execute(oversized)
+            XCTFail("Expected an oversized input error")
+        } catch {
+            XCTAssertEqual(error as? CapabilityError, .inputTooLarge)
         }
     }
 
-    func testCommandLikeTextIsSummarizedAsTextOnly() throws {
+    func testCommandLikeTextIsSummarizedAsTextOnly() async throws {
         let registry = NearBridgeCapabilityRegistry.macNB5()
         let payload = CapabilityMessagePayload(
             invocationID: UUID(),
@@ -54,7 +58,7 @@ final class NearBridgeCapabilityTests: XCTestCase {
             status: .requested
         )
 
-        let output = try registry.execute(payload)
+        let output = try await registry.execute(payload)
         XCTAssertTrue(output.contains("shell command"))
         XCTAssertTrue(output.contains("inert text"))
     }

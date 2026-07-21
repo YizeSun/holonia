@@ -5,7 +5,7 @@ public enum ContactDemoCapability {
     public static let textSummarization = "holonia.capability.text-summary.extractive.v1"
     public static let primaryHolonTextInsight = "holonia.capability.primary-holon.text-insight.v1"
     public static let defaultCapabilityID = primaryHolonTextInsight
-    public static let requestSummary = "Find the Host-selected Primary Holon text-insight capability"
+    public static let requestSummary = "Find the Host-selected Primary Holon inert-text capability"
     public static let responseSummary = "The Host offers one selected, allowlisted Primary Holon adapter; it has not been invoked yet"
 }
 

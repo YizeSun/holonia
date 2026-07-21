@@ -20,6 +20,7 @@ NearBridge 第一阶段只回答一个问题：
 - `NB-1 → NB-5` 的最终集成主路径已在真实 iPhone/Mac 上完成；延期环境、生命周期和边界矩阵仍未执行，所以尚不能称为稳定或生产就绪。
 - `NB-6` 已完成实现与自动化验证，并在真实 iPhone/Mac 上跑通 Apple NaturalLanguage 核心路径：Mac 选择编译时 allowlisted Primary Holon Implementation，iPhone 通过统一 `HolonAdapter` facade 调用，Mac 返回 signed real-model result；持久化、adapter 切换和边界矩阵待执行。
 - `NB-7` 已完成通用平台 contract 的实现与自动化验证：版本化 `HolonManifest`、capability registry 和显式 adapter execution profile；真机尚未运行，隔离 runner 与远程模型不属于本 checkpoint 的已实现结论。
+- `NB-8` 已完成独立 app-sandboxed Apple Foundation Models XPC runner、Host 单次并发策略、session 结束后丢弃结果以及有界 XPC contract；共享测试、macOS/iOS 构建和 Mac bundle 嵌入检查通过，签名 entitlement 与跨设备生成结果待真机验证。
 - 每个 `NB` 都使用独立 Git commit 和远端 checkpoint；自动化、模拟器与真机证据分别记录，后续修复添加新 commit，不改写已测试 checkpoint。
 - 不阻塞主线的权限、生命周期、网络环境和候选技术补测记录在 [`nearbridge/deferred-validation-todo.md`](nearbridge/deferred-validation-todo.md)。
 
@@ -177,11 +178,27 @@ versioned HolonManifest
 
 ### 通用平台之后的实施顺序
 
-1. `NB-8`：Host 管理的本地生成模型通过独立 app-sandboxed runner 执行，默认无文件、无命令、无网络。
-2. `NB-9`：iPhone 通过稳定 question-answer capability 调用所选 Mac Primary Holon，并显示 signed typed answer。
-3. `NB-10`：增加显式网络披露与 Keychain API key 的 OpenAI model-only adapter；不使用 Codex App/CLI 登录，也不传 tools。
-4. 后续：签名第三方 adapter 的准入、版本兼容和隔离验证。
-5. 更晚：只读项目分析与可写/命令型 Codex Agent，按独立安全计划推进。
+1. `NB-8`：Host 管理的本地生成模型通过独立 app-sandboxed runner 执行，默认无文件、无命令、无网络。实现与自动化已完成，物理验证待运行。
+2. `NB-9`：增加显式网络披露与 Host Keychain API key 的 OpenAI model-only adapter；iPhone 通过现有稳定 inert-text capability 调用并显示 signed typed answer，不使用 Codex App/CLI 登录，也不传 tools。
+3. `NB-10`：签名第三方 adapter 的准入、版本兼容和隔离验证。
+4. 更晚：只读项目分析与可写/命令型 Codex Agent，按独立安全计划推进。
+
+### NB-8：独立本地生成模型 runner
+
+NB-8 将 `NB-7` 声明的 `sandboxedLocalModel` profile 落到独立 XPC service：
+
+```text
+authenticated iPhone invocation
+→ Mac Host policy + capability registry
+→ bounded XPC request
+→ app-sandboxed Apple Foundation Models runner (tools: [])
+→ bounded XPC response
+→ signed typed NearBridge result
+```
+
+Host 同一时间只允许一个模型调用；连接或认证会话在结果返回前结束时，结果会被丢弃。XPC contract 不携带文件路径、workspace、凭据、命令或工具描述。当前 bundle 嵌入和无签名构建已检查，实际签名 entitlement、运行时进程边界和 iPhone → Mac → iPhone 生成结果必须由物理测试补证。
+
+当前实现、自动化证据和物理验证步骤见 [`nearbridge/nb8-results.md`](nearbridge/nb8-results.md)。
 
 ### NB-5 完成后的含义
 

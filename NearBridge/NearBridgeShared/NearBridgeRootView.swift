@@ -14,9 +14,9 @@ public struct NearBridgeRootView: View {
         NavigationStack {
             List {
                 Section {
-                    Label("Generic Holon contract checkpoint", systemImage: "shippingbox")
+                    Label("Sandboxed local model checkpoint", systemImage: "lock.square.stack")
                         .foregroundStyle(.orange)
-                    Text("NB-7 gives each Host-approved implementation a validated HolonManifest, capability schema registry, and explicit execution profile. No dynamic plugin loading or new file, command, workspace, or tool authority is introduced.")
+                    Text("NB-8 runs the Host-managed Apple generative model in an embedded app-sandboxed XPC service. Its interface accepts bounded text only and exposes no file, command, credential, network, workspace, or tool capability.")
                         .font(.caption)
                 }
 
@@ -209,7 +209,7 @@ public struct NearBridgeRootView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                Section("NB-7 Generic Holon demo") {
+                Section("NB-8 Sandboxed Primary Holon demo") {
                     if controller.registeredCapabilities.isEmpty {
                         Text("This device registers no executable capability.")
                             .font(.caption)
@@ -233,7 +233,7 @@ public struct NearBridgeRootView: View {
                         Text("\(capabilityInput.count) / 1200 characters")
                             .font(.caption2)
                             .foregroundStyle(capabilityInput.count > 1_200 ? .red : .secondary)
-                        Button("Invoke selected Mac Primary Holon") {
+                        Button("Ask selected Mac Primary Holon") {
                             controller.invokePrimaryHolon(input: capabilityInput)
                         }
                         .buttonStyle(.borderedProminent)
