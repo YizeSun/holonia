@@ -17,14 +17,20 @@ Unblocked by the successful Build Week P0/P1 implementation, tests, builds, and 
 - Capture one short establishing shot showing both physical devices on the same Wi-Fi if needed to make the setup credible.
 - Preserve the original captures. Use the execution receipt and structured diagnostics to align the two timelines.
 
-## Content to prepare later
+## Production assets prepared
 
-- Final 180-second shot list and time budget.
-- Exact click/tap choreography on iPhone and Mac.
-- English narration script plus optional Chinese working translation.
-- On-screen captions, callouts, and privacy redaction checklist.
-- Recording commands/app settings, cursor/tap visualization, audio levels, and export preset.
-- Optional AI narration workflow, subject to the chosen voice service’s terms and disclosure requirements.
-- Final review: no API key, personal notification, email, device identifier beyond intended fingerprints, or unrelated desktop content visible.
+- [Production package and exact choreography](video/production-package.md)
+- [Chinese physical-device capture checklist](video/capture-checklist-zh.md)
+- [English narration source](video/narration-en.txt)
+- [English caption draft](video/captions-en.srt)
+- [YouTube and Devpost copy](video/youtube-devpost-copy.md)
+
+## Remaining production work
+
+- Capture clean Mac and physical-iPhone source recordings.
+- Build a picture edit and retime the caption draft to the actual footage.
+- Generate or record final narration after the picture edit is locked.
+- Assemble the synchronized side-by-side final video.
+- Final privacy, audio, runtime, YouTube visibility, and submission-link review.
 
 Codex can help write the script, create the shot list, guide both recordings, generate/edit captions, assemble a side-by-side timeline with local video tools, and prepare an AI-voice-ready narration file. The user will still need to perform device interactions and grant any screen/microphone access requested by macOS/iOS.

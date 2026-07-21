@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <rect width="1920" height="1080" fill="#0B0F14"/>
+  <text x="140" y="170" fill="#FF8A24" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="28" font-weight="600" letter-spacing="4">ONE NARROW PATH</text>
+  <text x="140" y="254" fill="#F5F7FA" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="66" font-weight="700">The Host keeps authority</text>
+  <g font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial">
+    <g transform="translate(110 420)">
+      <rect width="292" height="188" rx="32" fill="#151B23" stroke="#334050" stroke-width="3"/>
+      <text x="146" y="82" text-anchor="middle" fill="#F5F7FA" font-size="36" font-weight="650">iPhone</text>
+      <text x="146" y="130" text-anchor="middle" fill="#9DA8B5" font-size="24">signed inert text</text>
+    </g>
+    <g transform="translate(486 420)">
+      <rect width="322" height="188" rx="32" fill="#151B23" stroke="#FF8A24" stroke-width="3"/>
+      <text x="161" y="76" text-anchor="middle" fill="#F5F7FA" font-size="34" font-weight="650">NearBridge</text>
+      <text x="161" y="124" text-anchor="middle" fill="#FFAC62" font-size="23">authenticated session</text>
+    </g>
+    <g transform="translate(892 420)">
+      <rect width="350" height="188" rx="32" fill="#151B23" stroke="#FF8A24" stroke-width="3"/>
+      <text x="175" y="76" text-anchor="middle" fill="#F5F7FA" font-size="34" font-weight="650">Mac Host policy</text>
+      <text x="175" y="124" text-anchor="middle" fill="#FFAC62" font-size="23">identity · allowlist · audit</text>
+    </g>
+    <g transform="translate(1326 420)">
+      <rect width="410" height="188" rx="32" fill="#151B23" stroke="#334050" stroke-width="3"/>
+      <text x="205" y="76" text-anchor="middle" fill="#F5F7FA" font-size="34" font-weight="650">GPT-5.6 model-only XPC</text>
+      <text x="205" y="124" text-anchor="middle" fill="#9DA8B5" font-size="23">fixed API · no tools</text>
+    </g>
+    <g stroke="#657383" stroke-width="4" fill="none">
+      <path d="M420 514 H468"/>
+      <path d="M826 514 H874"/>
+      <path d="M1260 514 H1308"/>
+    </g>
+    <g fill="#657383">
+      <path d="M468 514 l-16 -10 v20 z"/>
+      <path d="M874 514 l-16 -10 v20 z"/>
+      <path d="M1308 514 l-16 -10 v20 z"/>
+    </g>
+  </g>
+  <g font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="26" font-weight="560">
+    <rect x="208" y="752" width="285" height="68" rx="34" fill="#171E27"/><text x="350" y="795" text-anchor="middle" fill="#D9DEE4">NO FILES</text>
+    <rect x="585" y="752" width="285" height="68" rx="34" fill="#171E27"/><text x="728" y="795" text-anchor="middle" fill="#D9DEE4">NO SHELL</text>
+    <rect x="962" y="752" width="285" height="68" rx="34" fill="#171E27"/><text x="1105" y="795" text-anchor="middle" fill="#D9DEE4">NO WORKSPACE</text>
+    <rect x="1339" y="752" width="285" height="68" rx="34" fill="#171E27"/><text x="1482" y="795" text-anchor="middle" fill="#D9DEE4">NO TOOLS</text>
+  </g>
+  <text x="960" y="924" text-anchor="middle" fill="#8995A3" font-family="-apple-system, BlinkMacSystemFont, Helvetica Neue, Arial" font-size="26">The model receives only bounded text after Host policy checks.</text>
+</svg>

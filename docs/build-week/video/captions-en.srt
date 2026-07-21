@@ -1,0 +1,93 @@
+1
+00:00:00,000 --> 00:00:08,000
+The strongest model available to you may not fit
+on the phone in your hand.
+
+2
+00:00:08,000 --> 00:00:16,000
+But exposing a personal Mac as a generic remote-execution server
+would be unsafe. NearBridge takes a narrower path.
+
+3
+00:00:16,000 --> 00:00:24,000
+It is a native iPhone and Mac experiment for reaching one explicitly
+selected capability on a nearby computer.
+
+4
+00:00:24,000 --> 00:00:33,000
+Both apps are user-launched. They advertise locally,
+but a discovered device remains untrusted.
+
+5
+00:00:33,000 --> 00:00:42,000
+The user compares the same six-digit code
+and approves it on both sides.
+
+6
+00:00:42,000 --> 00:00:51,000
+NearBridge binds a fresh authenticated session to the paired keys.
+Discovery never becomes authentication by itself.
+
+7
+00:00:51,000 --> 00:01:00,000
+The iPhone requests contact with the Mac’s Primary Holon.
+The signed workflow confirms one registered inert-text capability.
+
+8
+00:01:00,000 --> 00:01:08,000
+The Mac Host—not the remote question—chooses
+which adapter can execute it.
+
+9
+00:01:08,000 --> 00:01:20,000
+I ask one ordinary, non-sensitive question.
+It is signed, expiring, session-correlated, and input-bounded.
+
+10
+00:01:20,000 --> 00:01:32,000
+The Mac routes it to the selected OpenAI GPT-5.6 Sol
+model-only adapter.
+
+11
+00:01:32,000 --> 00:01:44,000
+The separate app-sandboxed XPC request uses the Responses API
+with store false, omits tools, and has no file, shell, workspace,
+
+12
+00:01:44,000 --> 00:01:48,000
+Git, or device control.
+
+13
+00:01:48,000 --> 00:01:58,000
+The Mac signs the typed result. The iPhone validates sender,
+session, expiry, signature, and correlation.
+
+14
+00:01:58,000 --> 00:02:08,000
+Only then does it display the answer.
+Both sides retain the same execution receipt.
+
+15
+00:02:08,000 --> 00:02:19,000
+The receipt records provider, capability, outcome,
+acknowledgement, integrity, and latency.
+
+16
+00:02:19,000 --> 00:02:30,000
+Sanitized diagnostics omit prompt and answer bodies
+and redact credential-shaped values.
+
+17
+00:02:30,000 --> 00:02:39,000
+This is a bounded personal-AI bridge—not arbitrary remote execution,
+payload encryption, or a production-readiness claim.
+
+18
+00:02:39,000 --> 00:02:45,000
+Codex turned the security brief into incremental checkpoints,
+native flows, isolated runners, and fifty-four tests.
+
+19
+00:02:45,000 --> 00:02:50,000
+NearBridge lets your phone reach a stronger nearby model
+while the Host keeps control and audit.
