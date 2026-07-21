@@ -1,4 +1,4 @@
-# NearBridge
+# Holonia — NearBridge
 
 **NearBridge is Holonia's first runnable foundation:** a native iPhone-to-Mac
 capability path where discovery stays untrusted, people approve identity, the
