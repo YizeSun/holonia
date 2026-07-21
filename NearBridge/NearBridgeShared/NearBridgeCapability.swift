@@ -8,6 +8,20 @@ public struct NearBridgeCapabilityDescriptor: Codable, Equatable, Identifiable, 
     public let maximumOutputCharacters: Int
 
     public var id: String { capabilityID }
+
+    public init(
+        capabilityID: String,
+        displayName: String,
+        executorLabel: String,
+        maximumInputCharacters: Int,
+        maximumOutputCharacters: Int
+    ) {
+        self.capabilityID = capabilityID
+        self.displayName = displayName
+        self.executorLabel = executorLabel
+        self.maximumInputCharacters = maximumInputCharacters
+        self.maximumOutputCharacters = maximumOutputCharacters
+    }
 }
 
 public enum CapabilityExecutionStatus: String, Codable, Equatable, Sendable {
@@ -75,6 +89,16 @@ protocol NearBridgeCapabilityHandler {
     func execute(input: String) throws -> String
 }
 
+struct PrimaryHolonCapabilityHandler: NearBridgeCapabilityHandler {
+    let adapter: any HolonAdapter
+
+    var descriptor: NearBridgeCapabilityDescriptor { adapter.descriptor.capability }
+
+    func execute(input: String) throws -> String {
+        try adapter.execute(HolonTextRequest(text: input)).text
+    }
+}
+
 struct LocalSummaryAgent: NearBridgeCapabilityHandler {
     let descriptor = NearBridgeCapabilityDescriptor(
         capabilityID: ContactDemoCapability.textSummarization,
@@ -112,6 +136,10 @@ struct NearBridgeCapabilityRegistry {
 
     static func macNB5() -> NearBridgeCapabilityRegistry {
         NearBridgeCapabilityRegistry(handlers: [LocalSummaryAgent()])
+    }
+
+    static func macNB6(adapter: any HolonAdapter) -> NearBridgeCapabilityRegistry {
+        NearBridgeCapabilityRegistry(handlers: [PrimaryHolonCapabilityHandler(adapter: adapter)])
     }
 
     static func empty() -> NearBridgeCapabilityRegistry {

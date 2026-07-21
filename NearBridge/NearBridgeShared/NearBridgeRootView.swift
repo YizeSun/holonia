@@ -14,9 +14,9 @@ public struct NearBridgeRootView: View {
         NavigationStack {
             List {
                 Section {
-                    Label("Narrow local capability", systemImage: "cpu")
+                    Label("Primary Holon adapter checkpoint", systemImage: "cpu")
                         .foregroundStyle(.orange)
-                    Text("NB-5 lets the iPhone invoke one Host-registered text-summary Agent. No command, file, cloud, or dynamic tool access exists.")
+                    Text("NB-6 lets the Mac Host select one allowlisted Primary Holon adapter. The real-model option uses Apple on-device NaturalLanguage only; the adapter receives no command, file, cloud, workspace, or dynamic tool interface.")
                         .font(.caption)
                 }
 
@@ -29,6 +29,42 @@ public struct NearBridgeRootView: View {
                     }
                     if let issue = controller.identityIssue {
                         Text(issue).font(.caption).foregroundStyle(.red)
+                    }
+                }
+
+                Section("Primary Holon implementation") {
+                    if controller.role == .mac, let selected = controller.selectedPrimaryHolon {
+                        Picker(
+                            "Implementation",
+                            selection: Binding(
+                                get: { controller.selectedPrimaryHolon?.implementationID ?? selected.implementationID },
+                                set: { controller.selectPrimaryHolon(implementationID: $0) }
+                            )
+                        ) {
+                            ForEach(controller.availablePrimaryHolons) { implementation in
+                                Text(implementation.displayName).tag(implementation.implementationID)
+                            }
+                        }
+                        .disabled(controller.primaryHolonSelectionLocked)
+                        LabeledContent("Adapter", value: selected.adapterLabel)
+                        LabeledContent("Runtime", value: selected.runtime.rawValue)
+                        LabeledContent("Real model", value: selected.usesRealModel ? "yes · on-device" : "no · deterministic")
+                        Text(selected.modelDisclosure)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text(selected.implementationID)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+                        if controller.primaryHolonSelectionLocked {
+                            Text("Disconnect before changing the Host implementation so the active contact and capability contract cannot change mid-session.")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        }
+                    } else {
+                        Text("The iPhone does not select or execute the Mac Primary Holon. It can request only the fixed, signed text-insight capability after authentication and contact approval.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
 
@@ -134,18 +170,30 @@ public struct NearBridgeRootView: View {
                     }
                     switch controller.contactWorkflowState {
                     case .idle:
-                        Button("Request text-summary contact") { controller.startContactRequest() }
-                            .buttonStyle(.borderedProminent)
-                            .disabled(controller.authenticatedSessionState != .authenticated)
+                        if controller.role == .iPhone {
+                            Button("Request Primary Holon contact") { controller.startContactRequest() }
+                                .buttonStyle(.borderedProminent)
+                                .disabled(controller.authenticatedSessionState != .authenticated)
+                        } else {
+                            Text("Waiting for an authenticated iPhone request.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     case .requestReceived:
-                        Button("Respond: capability available") { controller.sendCapabilityResponse() }
-                            .buttonStyle(.borderedProminent)
+                        if controller.role == .mac {
+                            Button("Respond: capability available") { controller.sendCapabilityResponse() }
+                                .buttonStyle(.borderedProminent)
+                        }
                     case .responseReceived:
-                        Button("Accept contact") { controller.acceptContact() }
-                            .buttonStyle(.borderedProminent)
+                        if controller.role == .iPhone {
+                            Button("Accept contact") { controller.acceptContact() }
+                                .buttonStyle(.borderedProminent)
+                        }
                     case .acceptanceReceived:
-                        Button("Mark contact completed") { controller.completeContact() }
-                            .buttonStyle(.borderedProminent)
+                        if controller.role == .mac {
+                            Button("Mark contact completed") { controller.completeContact() }
+                                .buttonStyle(.borderedProminent)
+                        }
                     case .completed:
                         Label("Contact flow completed", systemImage: "checkmark.circle.fill")
                             .foregroundStyle(.green)
@@ -159,7 +207,7 @@ public struct NearBridgeRootView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                Section("NB-5 Agent demo") {
+                Section("NB-6 Primary Holon demo") {
                     if controller.registeredCapabilities.isEmpty {
                         Text("This device registers no executable capability.")
                             .font(.caption)
@@ -183,8 +231,8 @@ public struct NearBridgeRootView: View {
                         Text("\(capabilityInput.count) / 1200 characters")
                             .font(.caption2)
                             .foregroundStyle(capabilityInput.count > 1_200 ? .red : .secondary)
-                        Button("Invoke registered Mac summarizer") {
-                            controller.invokeTextSummary(input: capabilityInput)
+                        Button("Invoke selected Mac Primary Holon") {
+                            controller.invokePrimaryHolon(input: capabilityInput)
                         }
                         .buttonStyle(.borderedProminent)
                         .disabled(
@@ -198,7 +246,7 @@ public struct NearBridgeRootView: View {
                     if let output = controller.lastCapabilityOutput {
                         Text(output).textSelection(.enabled)
                     }
-                    Text("Agent role: receive a typed task after Host policy checks, run one local handler, return a signed typed result. The demo handler is deterministic, not an LLM.")
+                    Text("Adapter role: receive inert text after Host policy checks, run one compile-time allowlisted handler, and return a signed typed result. Payload encryption is still not claimed; do not enter secrets.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

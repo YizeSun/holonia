@@ -49,6 +49,8 @@
 - 第三方 Primary Holon运行在本地进程、沙箱、扩展还是远端服务？
 - 第三方实现获得什么上下文，如何证明没有保留数据？
 
+NB-6 只回答了 spike 级最小路径：Mac App 内、编译时 allowlisted、纯文本 `HolonAdapter`，不暴露文件、网络、Host key 或动态工具。它没有解决第三方进程沙箱、Primary Holon Account 绑定、上下文保留证明或长期运行问题。
+
 ## 5. 信誉
 
 - Publishing Reputation 与 Responding Reputation 各记录哪些事实？

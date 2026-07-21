@@ -4,7 +4,7 @@
 
 ## 1. 用途
 
-本清单保存已经识别、但不阻塞 `NB-1 → NB-5` 主线的真机与网络补充证据。
+本清单保存已经识别、但不阻塞已实现 checkpoint 的真机与网络补充证据。
 
 默认策略：先完成 NearBridge v0 的纵向能力闭环，再集中执行这些环境矩阵。若主线中出现与某一项直接相关的缺陷，可以提前执行对应测试。
 
@@ -55,7 +55,17 @@
 - Host 只允许调用明确注册的窄能力，并拒绝任意命令执行；
 - 关键授权、拒绝、调用和结果必须留下可检查的诊断或审计事件。
 
-## 7. 记录规则
+## 7. NB-6 Primary Holon 补充证据
+
+- [ ] 从 NB-6 commit 在真实 Mac/iPhone 上确认 Apple NaturalLanguage Primary Holon 跨设备调用成功。
+- [ ] 关闭并重新打开 Mac App，确认 Primary Holon Implementation 选择持久化。
+- [ ] 活动连接期间确认 Picker 锁定，断开后才允许切换 adapter。
+- [ ] 切换 deterministic fallback、重新联系并确认执行结果来自新 adapter。
+- [ ] 用 command-like inert text、空文本、1,201 字符和重复 invocation 运行拒绝/去重路径。
+- [ ] 记录不同语言、neutral/positive/negative 文本在目标系统版本上的 model 输出；不把分类质量当作 NearBridge 认证结论。
+- [ ] 使用系统网络观察工具确认 Apple adapter 没有模型云请求；代码检查结论不能代替运行时网络证据。
+
+## 8. 记录规则
 
 完成一项时，在复选框下补充：
 

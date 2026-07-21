@@ -8,7 +8,7 @@ NearBridge 第一阶段只回答一个问题：
 
 第一目标不是聚合 GPU，也不是立即运行分布式大模型。
 
-### 当前进度（2026-07-20）
+### 当前进度（2026-07-21）
 
 - `NB-0` 普通 Wi-Fi 核心真机路径已经完成：iPhone 与 Mac mini 可发现、连接、双向交换 ping/pong，并在手动断开重连后继续通信。
 - `Bonjour + Network.framework` 是进入下一阶段的暂定主方案，仍不代表设备已经可信或通过认证。
@@ -17,7 +17,8 @@ NearBridge 第一阶段只回答一个问题：
 - `NB-3` 已完成实现与自动化验证：paired-key sender authentication、fresh-session binding、签名完整性、过期、去重、ping/pong/ack 相关性与清晰状态；真机交换待验证。
 - `NB-4` 已完成实现与自动化验证：Request → Capability Response → Contact Accepted → Completed 的签名联系状态机；不调用 Agent 或远程操作。
 - `NB-5` 已完成实现与自动化验证：iPhone 可在完成联系流程后调用 Mac Host 明确注册的 deterministic text-summary Agent，并接收签名 typed result；没有任意命令、文件、云或动态工具入口。
-- `NB-1 → NB-5` 已达到 code/automated feature-complete checkpoint；每一阶段的真机验收和延期环境矩阵仍待执行，所以尚不能称为稳定或生产就绪。
+- `NB-1 → NB-5` 的最终集成主路径已在真实 iPhone/Mac 上完成；延期环境、生命周期和边界矩阵仍未执行，所以尚不能称为稳定或生产就绪。
+- `NB-6` 已完成实现与自动化验证：Mac 用户可选择并持久化一个编译时 allowlisted Primary Holon Implementation，统一 `HolonAdapter` 后有 Apple 设备端 NaturalLanguage real-model option 和 deterministic fallback；NB-6 真机验证待执行。
 - 每个 `NB` 都使用独立 Git commit 和远端 checkpoint；自动化、模拟器与真机证据分别记录，后续修复添加新 commit，不改写已测试 checkpoint。
 - 不阻塞主线的权限、生命周期、网络环境和候选技术补测记录在 [`nearbridge/deferred-validation-todo.md`](nearbridge/deferred-validation-todo.md)。
 
@@ -141,6 +142,21 @@ Request：Completed
 该能力必须是明确注册的接口，不开放任意命令执行。
 
 当前 checkpoint 的 Host allowlist、Agent 示例、安全边界和验证证据见 [`nearbridge/nb5-results.md`](nearbridge/nb5-results.md)。
+
+### NB-6：Primary Holon Implementation 与 adapter 实验
+
+NB-5 证明固定 handler 可以通过 Host boundary 被调用。NB-6 进一步验证：
+
+```text
+Mac 用户本地选择 Primary Holon Implementation
+→ Host 只启用对应编译时 HolonAdapter
+→ iPhone 仍只看见稳定、窄化的 text-insight capability
+→ 真实设备端模型或 deterministic fallback 在同一授权边界后执行
+```
+
+NB-6 不绑定 Primary Holon Account，不允许远端选模型，不开放文件、workspace、shell、网络或动态工具。当前真实模型选项是 Apple `NaturalLanguage` 的设备端 language/sentiment model，不是 LLM。
+
+当前实现、自动化证据、明确非目标和下一条真机步骤见 [`nearbridge/nb6-results.md`](nearbridge/nb6-results.md)。
 
 ### NB-5 完成后的含义
 

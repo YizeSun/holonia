@@ -54,7 +54,7 @@ final class NearBridgeContactWorkflowTests: XCTestCase {
         XCTAssertEqual(provider.state, .completed)
         XCTAssertEqual(requester.requestID, provider.requestID)
         XCTAssertEqual(requester.responseID, provider.responseID)
-        XCTAssertEqual(requester.capabilityID, ContactDemoCapability.textSummarization)
+        XCTAssertEqual(requester.capabilityID, ContactDemoCapability.primaryHolonTextInsight)
     }
 
     func testProviderCannotSkipRequestAndSendResponse() throws {

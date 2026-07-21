@@ -24,6 +24,8 @@ public final class NearBridgeController: ObservableObject {
     @Published public private(set) var registeredCapabilities: [NearBridgeCapabilityDescriptor] = []
     @Published public private(set) var capabilityExecutionState: CapabilityExecutionState = .idle
     @Published public private(set) var lastCapabilityOutput: String?
+    @Published public private(set) var availablePrimaryHolons: [PrimaryHolonDescriptor] = []
+    @Published public private(set) var selectedPrimaryHolon: PrimaryHolonDescriptor?
 
     public let role: DeviceRole
     public let phase = NearBridgeBuild.phase
@@ -33,7 +35,9 @@ public final class NearBridgeController: ObservableObject {
     private let identityManager: HostIdentityManager?
     private let pairingStore = KeychainPairingRecordStore()
     private var pairingStoreAvailable = true
-    private let capabilityRegistry: NearBridgeCapabilityRegistry
+    private var capabilityRegistry: NearBridgeCapabilityRegistry
+    private let primaryHolonCatalog: PrimaryHolonCatalog
+    private let primaryHolonSelectionStore: PrimaryHolonSelectionStore
     private var trustRegistry = NearBridgeTrustRegistry()
     private var pairingMachine = NearBridgePairingStateMachine()
     private var localHello: PairingHello?
@@ -54,7 +58,18 @@ public final class NearBridgeController: ObservableObject {
 
     public init(role: DeviceRole) {
         self.role = role
-        capabilityRegistry = role == .mac ? .macNB5() : .empty()
+        let primaryHolonCatalog = PrimaryHolonCatalog.standard()
+        let primaryHolonSelectionStore = PrimaryHolonSelectionStore()
+        self.primaryHolonCatalog = primaryHolonCatalog
+        self.primaryHolonSelectionStore = primaryHolonSelectionStore
+        if role == .mac {
+            let adapter = primaryHolonSelectionStore.load(catalog: primaryHolonCatalog)
+            availablePrimaryHolons = primaryHolonCatalog.descriptors
+            selectedPrimaryHolon = adapter.descriptor
+            capabilityRegistry = .macNB6(adapter: adapter)
+        } else {
+            capabilityRegistry = .empty()
+        }
         registeredCapabilities = capabilityRegistry.descriptors
         do {
             let identity = try HostIdentityManager.loadOrCreate()
@@ -70,6 +85,40 @@ public final class NearBridgeController: ObservableObject {
         } catch {
             pairingStoreAvailable = false
             identityIssue = [identityIssue, "Could not load pairings: \(error.localizedDescription)"].compactMap { $0 }.joined(separator: " · ")
+        }
+    }
+
+    public var primaryHolonSelectionLocked: Bool {
+        [.connecting, .connected, .reconnecting].contains(sessionState) || authenticatedSessionState != .idle
+    }
+
+    public func selectPrimaryHolon(implementationID: String) {
+        guard role == .mac else {
+            record(category: .capability, state: "selectionRejected", detail: "Only the Mac Host selects its local Primary Holon implementation")
+            return
+        }
+        guard !primaryHolonSelectionLocked else {
+            record(category: .capability, state: "selectionLocked", detail: "Disconnect before changing the Primary Holon implementation")
+            return
+        }
+        guard let adapter = primaryHolonCatalog.adapter(implementationID: implementationID) else {
+            record(category: .capability, state: "selectionRejected", detail: "The requested Primary Holon adapter is not compiled into the Host allowlist")
+            return
+        }
+        do {
+            try primaryHolonSelectionStore.save(implementationID: implementationID, catalog: primaryHolonCatalog)
+            selectedPrimaryHolon = adapter.descriptor
+            capabilityRegistry = .macNB6(adapter: adapter)
+            registeredCapabilities = capabilityRegistry.descriptors
+            capabilityExecutionState = .idle
+            lastCapabilityOutput = nil
+            record(
+                category: .capability,
+                state: "primaryHolonSelected",
+                detail: "Host selected \(adapter.descriptor.displayName) through \(adapter.descriptor.adapterLabel)"
+            )
+        } catch {
+            record(category: .capability, state: "selectionRejected", error: error, detail: error.localizedDescription)
         }
     }
 
@@ -167,6 +216,10 @@ public final class NearBridgeController: ObservableObject {
     }
 
     public func startContactRequest() {
+        guard role == .iPhone else {
+            record(category: .workflow, state: "requestRejected", detail: "NB-6 contact requests originate on the iPhone")
+            return
+        }
         guard contactWorkflow.state == .idle else { return }
         do {
             let context = try authenticatedContext()
@@ -184,11 +237,20 @@ public final class NearBridgeController: ObservableObject {
     }
 
     public func sendCapabilityResponse() {
+        guard role == .mac else {
+            record(category: .workflow, state: "responseRejected", detail: "Only the Mac Host can offer the NB-6 Primary Holon capability")
+            return
+        }
         guard contactWorkflow.state == .requestReceived, let request = contactRequestMessage else { return }
         do {
+            guard let requestedID = request.payload.contact?.capabilityID,
+                  registeredCapabilities.contains(where: { $0.capabilityID == requestedID }) else {
+                throw CapabilityError.notRegistered
+            }
             let context = try authenticatedContext()
             let message = try ReliableMessageCodec.makeCapabilityResponse(
                 to: request,
+                summary: "Host offers \(selectedPrimaryHolon?.displayName ?? "one selected Primary Holon") through a fixed HolonAdapter",
                 sessionID: context.sessionID,
                 identityManager: context.identity
             )
@@ -202,6 +264,10 @@ public final class NearBridgeController: ObservableObject {
     }
 
     public func acceptContact() {
+        guard role == .iPhone else {
+            record(category: .workflow, state: "acceptanceRejected", detail: "The iPhone requester must accept the Primary Holon contact")
+            return
+        }
         guard contactWorkflow.state == .responseReceived, let response = capabilityResponseMessage else { return }
         do {
             let context = try authenticatedContext()
@@ -220,6 +286,10 @@ public final class NearBridgeController: ObservableObject {
     }
 
     public func completeContact() {
+        guard role == .mac else {
+            record(category: .workflow, state: "completionRejected", detail: "The Mac capability provider completes the NB-6 contact")
+            return
+        }
         guard contactWorkflow.state == .acceptanceReceived, let acceptance = contactAcceptanceMessage else { return }
         do {
             let context = try authenticatedContext()
@@ -236,7 +306,7 @@ public final class NearBridgeController: ObservableObject {
         }
     }
 
-    public func invokeTextSummary(input: String) {
+    public func invokePrimaryHolon(input: String) {
         do {
             guard role == .iPhone else { throw CapabilityError.wrongRole }
             guard contactWorkflowState == .completed else { throw CapabilityError.workflowNotCompleted }
@@ -246,6 +316,7 @@ public final class NearBridgeController: ObservableObject {
             let context = try authenticatedContext()
             let message = try ReliableMessageCodec.makeCapabilityInvocation(
                 input: normalized,
+                capabilityID: ContactDemoCapability.primaryHolonTextInsight,
                 sessionID: context.sessionID,
                 identityManager: context.identity
             )

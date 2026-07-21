@@ -330,7 +330,7 @@ public enum ReliableMessageCodec {
 
     public static func makeCapabilityInvocation(
         input: String,
-        capabilityID: String = ContactDemoCapability.textSummarization,
+        capabilityID: String = ContactDemoCapability.primaryHolonTextInsight,
         invocationID: UUID = UUID(),
         sessionID: String,
         identityManager: HostIdentityManager,

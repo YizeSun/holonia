@@ -19,6 +19,7 @@
 | NB-3 | 完成 | 20/20 测试通过；macOS 与通用 iOS Device SDK 构建通过 | 未运行 | 集成版签名消息通过；专用双向 ping/disconnect 待验证 | [`nb3-results.md`](nb3-results.md) |
 | NB-4 | 完成 | 23/23 测试通过；macOS 与通用 iOS Device SDK 构建通过 | 未运行 | 集成版 Contact 主路径通过 | [`nb4-results.md`](nb4-results.md) |
 | NB-5 | 完成 | 27/27 测试通过；macOS 与通用 iOS Device SDK 构建通过 | 未运行 | 集成版 Agent 主路径通过；边界矩阵待验证 | [`nb5-results.md`](nb5-results.md) |
+| NB-6 | 完成 | 32/32 测试通过；Apple NaturalLanguage adapter 在开发 Mac 上执行；macOS 与通用 iOS Device SDK 构建通过 | 未运行 | 未运行 | [`nb6-results.md`](nb6-results.md) |
 
 2026-07-21 的集成真机结果记录在 [`physical-validation-2026-07-21.md`](physical-validation-2026-07-21.md)。它基于 `68ee156` 的实现和随后由 `2c76865` 固化的 Mac Apple development signing 配置；它不是五个历史 checkpoint 的逐一安装测试。
 
@@ -31,3 +32,5 @@ NB-3 的集成真机主路径已观察 signed Contact/capability messages 与 ac
 NB-4 的集成真机主路径已在两端 UI 完成完整 Contact 流程；断开连接后的 reset 行为仍待验证。
 
 NB-5 的集成真机主路径已观察 iPhone 调用、Mac 本地 deterministic summary Agent 执行、signed result 返回和预期摘要显示；命令样文本、超长输入和失败路径仍待验证，也不代表已集成 LLM、exo 或 Primary Holon 选择。
+
+NB-6 已实现 Mac 本地 Primary Holon Implementation Picker、持久选择、统一 `HolonAdapter` boundary、Apple 设备端 NaturalLanguage model 和 deterministic fallback；当前只有自动化与构建证据，尚未安装到 iPhone/Mac 运行，不能称为真机通过。

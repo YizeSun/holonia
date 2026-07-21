@@ -3,9 +3,10 @@ import Foundation
 public enum ContactDemoCapability {
     public static let codeProblemAnalysis = "holonia.contact.code-analysis.v1"
     public static let textSummarization = "holonia.capability.text-summary.extractive.v1"
-    public static let defaultCapabilityID = textSummarization
-    public static let requestSummary = "Find the explicitly registered local text-summary capability"
-    public static let responseSummary = "The Host offers a narrow local summary Agent; it has not been invoked yet"
+    public static let primaryHolonTextInsight = "holonia.capability.primary-holon.text-insight.v1"
+    public static let defaultCapabilityID = primaryHolonTextInsight
+    public static let requestSummary = "Find the Host-selected Primary Holon text-insight capability"
+    public static let responseSummary = "The Host offers one selected, allowlisted Primary Holon adapter; it has not been invoked yet"
 }
 
 public struct ContactWorkflowPayload: Codable, Equatable, Sendable {
