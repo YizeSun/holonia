@@ -1,4 +1,4 @@
-# Holonia · NearBridge
+# NearBridge
 
 **NearBridge is the first working edge of Holonia:** a native iPhone-to-Mac
 capability path where discovery stays untrusted, people approve identity, the
@@ -7,13 +7,27 @@ correlated result.
 
 [Watch the 2:50 physical-device demo](https://youtu.be/4s-6gypJUYA) ·
 [Reviewer runbook](docs/build-week/reviewer-runbook.md) ·
-[Validation evidence](docs/nearbridge/progress.md) ·
-[中文介绍](README.zh-CN.md)
+[Validation evidence](docs/nearbridge/progress.md)
 
 > **Experimental checkpoint:** one real iPhone/Mac pair has completed the
 > Build Week happy path. NearBridge is not production-ready and does not claim
 > payload encryption, concurrent multi-client routing, or arbitrary Agent
 > execution.
+
+## Contents
+
+- [The Holonia vision](#the-holonia-vision)
+- [Problem and motivation](#problem-and-motivation)
+- [Why NearBridge comes first](#why-nearbridge-comes-first)
+- [30-second demo flow](#30-second-demo-flow)
+- [Architecture and trust boundaries](#current-nearbridge-architecture)
+- [How Codex and GPT-5.6 are used](#openai-build-week-2026)
+- [Quick start and tests](#quick-start-and-tests)
+- [Physical evidence](#physical-evidence)
+- [Current limitations](#current-limitations)
+- [Roadmap](#roadmap)
+- [NearBridge documentation](#nearbridge-documentation)
+- [Licensing](#licensing)
 
 ## The Holonia vision
 
@@ -57,9 +71,8 @@ flowchart TD
     Core --> Networks["Specialized Networks<br/>code, procurement, hiring, compute, …"]
 ```
 
-The broader design remains intentionally unfrozen. See
-[design decisions](docs/design-decisions.md), the
-[roadmap](docs/roadmap.md), and [open questions](docs/open-questions.md).
+The broader Holonia design remains intentionally unfrozen. NearBridge is the
+concrete, working implementation developed in this repository.
 
 ## Problem and motivation
 
@@ -180,12 +193,7 @@ OpenAI technology in different ways:
 | **GPT-5.6 Sol** | The optional runtime model behind `OpenAIModelOnlyHolonAdapter`. The Mac makes a bounded Responses API request for the iPhone's inert-text question. | No files, workspace, shell, Git, device control, arbitrary URL, dynamic tools, or persistent Agent loop. |
 | **Codex** | Engineering collaborator used to turn the written design brief into NB checkpoints; implement Swift discovery, pairing, authentication, workflows, manifests, XPC boundaries, tests, and reviewer UI; diagnose physical-device failures; and prepare runbooks and evidence. | Codex App/CLI credentials and tool permissions are not inherited by the NearBridge runtime. |
 
-The incremental NB commits and tags preserve the implementation trail. The
-Devpost submission uses the session ID returned after sharing the primary Codex
-task through `/feedback`; that ID is submitted to the event rather than stored
-as a project credential.
-
-Implementation evidence:
+Where this is implemented:
 
 - [`NearBridgeOpenAIRunner.swift`](NearBridge/NearBridgeShared/NearBridgeOpenAIRunner.swift)
   defines the bounded model-only request contract.
@@ -222,10 +230,10 @@ swift test
 3. Run `NearBridgeIOS` on the physical iPhone.
 4. Follow the [three-minute reviewer runbook](docs/build-week/reviewer-runbook.md).
 
-No API key is committed. The deterministic and Apple adapters can exercise the
-local trust and capability path without an OpenAI credential; the real GPT-5.6
-network path requires a test key entered into the Mac app and stored in its
-Keychain.
+The deterministic and Apple adapters exercise the local trust and capability
+path without an OpenAI credential. To reproduce the GPT-5.6 path, enter an
+OpenAI API key in the Mac app; the credential remains in Mac Keychain and is
+not exposed to the iPhone or sanitized diagnostic export.
 
 ## Physical evidence
 
@@ -271,20 +279,19 @@ compatibility, and isolation verification. Later work may add:
   lifecycle recovery.
 
 Open P2P propagation, reputation, payment, and specialized work networks belong
-to the broader Holonia roadmap, not the current NearBridge checkpoint. The
-[small code-task network plan](docs/code-network-plan.md) is a future design,
-not an implemented feature.
+to later Holonia phases, not the current NearBridge checkpoint.
 
-## Documentation map
+## NearBridge documentation
 
-- [Holonia design decisions](docs/design-decisions.md)
-- [Holonia roadmap](docs/roadmap.md)
-- [NearBridge implementation plan](docs/nearbridge-plan.md)
-- [NearBridge validation status](docs/nearbridge/progress.md)
 - [Build Week reviewer runbook](docs/build-week/reviewer-runbook.md)
+- [NearBridge validation status](docs/nearbridge/progress.md)
+- [NearBridge implementation plan](docs/nearbridge-plan.md)
+- [NB-9 physical-model checkpoint](docs/nearbridge/nb9-results.md)
 - [Build Week evaluation plan](docs/build-week/evaluation-plan.md)
 - [Deferred validation and capability work](docs/nearbridge/deferred-validation-todo.md)
-- [Open design questions](docs/open-questions.md)
+
+For the longer-term context beyond NearBridge, see the
+[Holonia roadmap](docs/roadmap.md).
 
 ## Licensing
 
