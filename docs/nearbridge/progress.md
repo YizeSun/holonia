@@ -22,7 +22,7 @@
 | NB-6 | 完成 | 32/32 测试通过；Apple NaturalLanguage adapter 在开发 Mac 上执行；macOS 与通用 iOS Device SDK 构建通过 | 未运行 | Apple real-model 核心路径通过；持久化/切换/边界矩阵待验证 | [`nb6-results.md`](nb6-results.md) |
 | NB-7 | 实现完成 | 37/37 测试通过；macOS 与通用 iOS Device SDK 构建通过 | 未运行 | 未运行 | [`nb7-results.md`](nb7-results.md) |
 | NB-8 | 实现完成 | 39/39 测试通过；macOS 与通用 iOS Device SDK 构建通过；Mac bundle XPC 嵌入检查通过 | 未运行 | 未运行 | [`nb8-results.md`](nb8-results.md) |
-| NB-9 | 实现完成 | 49/49 测试通过；macOS 与通用 iOS Device SDK 构建通过；Mac bundle 双 XPC 嵌入检查通过 | 未运行 | 未运行；未使用真实 API key | [`nb9-results.md`](nb9-results.md) |
+| NB-9 | 实现完成 | 50/50 测试通过；macOS 与通用 iOS Device SDK 构建通过；Mac bundle 双 XPC 注册/嵌入检查通过 | 未运行 | 首次调用在 XPC lookup 失败；packaging 已修复，真实 API 重测待运行 | [`nb9-results.md`](nb9-results.md) |
 
 2026-07-21 的集成真机结果记录在 [`physical-validation-2026-07-21.md`](physical-validation-2026-07-21.md)。它基于 `68ee156` 的实现和随后由 `2c76865` 固化的 Mac Apple development signing 配置；它不是五个历史 checkpoint 的逐一安装测试。
 

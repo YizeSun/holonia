@@ -4,6 +4,23 @@ import XCTest
 final class NearBridgeOpenAIRunnerTests: XCTestCase {
     private let apiKey = "sk-test-12345678901234567890"
 
+    func testEmbeddedRunnerInfoPlistsDeclareApplicationXPCService() throws {
+        let nearBridgeRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        for relativePath in [
+            "NearBridgeOpenAIRunner/Info.plist",
+            "NearBridgeModelRunner/Info.plist"
+        ] {
+            let data = try Data(contentsOf: nearBridgeRoot.appendingPathComponent(relativePath))
+            let plist = try XCTUnwrap(
+                PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
+            )
+            let xpcService = try XCTUnwrap(plist["XPCService"] as? [String: Any])
+            XCTAssertEqual(xpcService["ServiceType"] as? String, "Application", relativePath)
+        }
+    }
+
     func testRequestUsesFixedEndpointModelAndNoToolsOrCredentialInBody() throws {
         let request = RemoteModelRequest(
             prompt: "What can NearBridge do?",

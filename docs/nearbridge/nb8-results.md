@@ -93,3 +93,9 @@ xcodebuild -project NearBridge/NearBridge.xcodeproj \
 6. 检查签名 XPC entitlement，并观察 runner 是否产生网络连接。
 
 在以上步骤完成前，NB-8 的 Physical 状态保持 `Not tested`。
+
+## 2026-07-21 XPC packaging correction
+
+NB-9 首次物理调用暴露出两个嵌入 XPC 的 `Info.plist` 缺少 `XPCService` dictionary。bundle 虽然位于 `Contents/XPCServices`，launchd 仍无法按 service name 注册它。OpenAI runner 的系统日志为 `failed lookup ... error = 3: No such process`，失败发生在任何 provider 网络请求之前。
+
+后续修复为两个 runner 都加入 `XPCService.ServiceType = Application`。因此 NB-8 的旧 bundle 嵌入检查不再被解释为 runner 可启动证据；必须从修复后的 commit 重建并运行上述物理测试。
