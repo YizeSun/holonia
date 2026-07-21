@@ -21,6 +21,7 @@ NearBridge 第一阶段只回答一个问题：
 - `NB-6` 已完成实现与自动化验证，并在真实 iPhone/Mac 上跑通 Apple NaturalLanguage 核心路径：Mac 选择编译时 allowlisted Primary Holon Implementation，iPhone 通过统一 `HolonAdapter` facade 调用，Mac 返回 signed real-model result；持久化、adapter 切换和边界矩阵待执行。
 - `NB-7` 已完成通用平台 contract 的实现与自动化验证：版本化 `HolonManifest`、capability registry 和显式 adapter execution profile；真机尚未运行，隔离 runner 与远程模型不属于本 checkpoint 的已实现结论。
 - `NB-8` 已完成独立 app-sandboxed Apple Foundation Models XPC runner、Host 单次并发策略、session 结束后丢弃结果以及有界 XPC contract；共享测试、macOS/iOS 构建和 Mac bundle 嵌入检查通过，签名 entitlement 与跨设备生成结果待真机验证。
+- `NB-9` 已完成 OpenAI model-only Primary Holon adapter、Mac Host Keychain 凭据管理、固定 Responses API 请求和独立 network-client XPC runner；共享测试、macOS/iOS 构建和双 XPC bundle 嵌入检查通过，真实 API 与跨设备结果待用户配置凭据后验证。
 - 每个 `NB` 都使用独立 Git commit 和远端 checkpoint；自动化、模拟器与真机证据分别记录，后续修复添加新 commit，不改写已测试 checkpoint。
 - 不阻塞主线的权限、生命周期、网络环境和候选技术补测记录在 [`nearbridge/deferred-validation-todo.md`](nearbridge/deferred-validation-todo.md)。
 
@@ -199,6 +200,28 @@ authenticated iPhone invocation
 Host 同一时间只允许一个模型调用；连接或认证会话在结果返回前结束时，结果会被丢弃。XPC contract 不携带文件路径、workspace、凭据、命令或工具描述。当前 bundle 嵌入和无签名构建已检查，实际签名 entitlement、运行时进程边界和 iPhone → Mac → iPhone 生成结果必须由物理测试补证。
 
 当前实现、自动化证据和物理验证步骤见 [`nearbridge/nb8-results.md`](nearbridge/nb8-results.md)。
+
+### NB-9：OpenAI model-only Primary Holon
+
+NB-9 在相同通用 registry 和稳定 capability facade 后增加远程强模型选项：
+
+```text
+iPhone plain-text question
+→ authenticated and signed NearBridge invocation
+→ Mac Host policy + selected Primary Holon
+→ Host Keychain credential loaded for this invocation
+→ app-sandboxed network-client XPC
+→ fixed OpenAI Responses API model (store: false; tools omitted)
+→ bounded inert-text answer
+→ signed typed result
+→ iPhone display
+```
+
+Mac 用户决定是否选择该实现，并只在 Mac App 内配置独立 OpenAI API key。iPhone 不能选择 provider、发送凭据、改变 endpoint/model 或开启工具。API key 只在 Host 与 XPC 的单次内存请求中出现，不进入 NearBridge 消息、HTTP body 或结构化诊断。
+
+这一 checkpoint 所说的 “Codex” 是强 OpenAI 模型的纯文本回答能力，不是 Codex App/CLI 会话或工具型 coding Agent。它没有 workspace、文件、命令、Git、动态 tools、持久记忆或常驻 daemon。真实 API 调用可能产生 OpenAI API 用量与费用，且只有用户配置凭据并主动发问时才会发生。
+
+当前实现、自动化证据和物理验证步骤见 [`nearbridge/nb9-results.md`](nearbridge/nb9-results.md)。
 
 ### NB-5 完成后的含义
 

@@ -39,7 +39,8 @@ public struct ReliableMessagePayload: Codable, Equatable, Sendable {
 
 public struct NearBridgeReliableMessage: Codable, Equatable, Identifiable, Sendable {
     public static let protocolName = "nearbridge.message.v1"
-    public static let supportedSchemaVersion = 1
+    public static let supportedSchemaVersion = 2
+    public static let maximumCapabilityResultCharacters = 4_000
 
     public let protocolName: String
     public let schemaVersion: Int
@@ -533,7 +534,7 @@ public enum ReliableMessageCodec {
                   capability.inputText == nil,
                   let output = capability.outputText,
                   !output.isEmpty,
-                  output.count <= 280 else { throw ReliableMessageError.invalidCorrelation }
+                  output.count <= NearBridgeReliableMessage.maximumCapabilityResultCharacters else { throw ReliableMessageError.invalidCorrelation }
         case .capabilityFailure:
             guard message.payload.sequence == nil,
                   message.payload.contact == nil,

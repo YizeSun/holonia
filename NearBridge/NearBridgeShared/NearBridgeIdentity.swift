@@ -23,6 +23,18 @@ public enum HostIdentityError: Error, LocalizedError {
     }
 }
 
+public enum OpenAICredentialError: Error, Equatable, LocalizedError {
+    case invalidAPIKey
+    case invalidStoredCredential
+
+    public var errorDescription: String? {
+        switch self {
+        case .invalidAPIKey: return "Enter a valid OpenAI API key in the Mac App"
+        case .invalidStoredCredential: return "The OpenAI API key stored by the Mac Host is invalid"
+        }
+    }
+}
+
 final class KeychainBlobStore {
     private let service: String
 
@@ -73,6 +85,50 @@ final class KeychainBlobStore {
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw HostIdentityError.keychain(status)
         }
+    }
+}
+
+public struct OpenAIAPIKeyStore: @unchecked Sendable {
+    private static let account = "responses-api-key-v1"
+    private let store = KeychainBlobStore(service: "org.holonia.nearbridge.openai")
+
+    public init() {}
+
+    public static func validate(_ value: String) throws {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed == value,
+              (20...512).contains(value.count),
+              value.hasPrefix("sk-"),
+              !value.unicodeScalars.contains(where: { CharacterSet.whitespacesAndNewlines.contains($0) }) else {
+            throw OpenAICredentialError.invalidAPIKey
+        }
+    }
+
+    public func load() throws -> String? {
+        guard let data = try store.read(account: Self.account) else { return nil }
+        guard let value = String(data: data, encoding: .utf8) else {
+            throw OpenAICredentialError.invalidStoredCredential
+        }
+        do {
+            try Self.validate(value)
+        } catch {
+            throw OpenAICredentialError.invalidStoredCredential
+        }
+        return value
+    }
+
+    public func save(_ value: String) throws {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        try Self.validate(trimmed)
+        try store.write(Data(trimmed.utf8), account: Self.account)
+    }
+
+    public func remove() throws {
+        try store.remove(account: Self.account)
+    }
+
+    public func isConfigured() throws -> Bool {
+        try load() != nil
     }
 }
 

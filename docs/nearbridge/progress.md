@@ -22,6 +22,7 @@
 | NB-6 | 完成 | 32/32 测试通过；Apple NaturalLanguage adapter 在开发 Mac 上执行；macOS 与通用 iOS Device SDK 构建通过 | 未运行 | Apple real-model 核心路径通过；持久化/切换/边界矩阵待验证 | [`nb6-results.md`](nb6-results.md) |
 | NB-7 | 实现完成 | 37/37 测试通过；macOS 与通用 iOS Device SDK 构建通过 | 未运行 | 未运行 | [`nb7-results.md`](nb7-results.md) |
 | NB-8 | 实现完成 | 39/39 测试通过；macOS 与通用 iOS Device SDK 构建通过；Mac bundle XPC 嵌入检查通过 | 未运行 | 未运行 | [`nb8-results.md`](nb8-results.md) |
+| NB-9 | 实现完成 | 49/49 测试通过；macOS 与通用 iOS Device SDK 构建通过；Mac bundle 双 XPC 嵌入检查通过 | 未运行 | 未运行；未使用真实 API key | [`nb9-results.md`](nb9-results.md) |
 
 2026-07-21 的集成真机结果记录在 [`physical-validation-2026-07-21.md`](physical-validation-2026-07-21.md)。它基于 `68ee156` 的实现和随后由 `2c76865` 固化的 Mac Apple development signing 配置；它不是五个历史 checkpoint 的逐一安装测试。
 
@@ -40,3 +41,5 @@ NB-6 已在真实 iPhone/Mac 上观察到 Mac 选择 Apple NaturalLanguage Prima
 NB-7 只建立通用平台 contract：版本化 `HolonManifest`、capability registry 和显式 adapter execution profile。自动化和构建通过不代表隔离 runner、第三方 adapter 或 OpenAI/Codex 远程回答已经完成，也没有 NB-7 真机结果。
 
 NB-8 已把 Apple Foundation Models adapter 放入嵌入 Mac App 的独立 XPC service，并通过源 entitlement、协议边界、超时、单一在途调用与 session 失效丢弃策略限制执行。39/39 测试、两目标无签名构建和产物嵌入检查通过；这些证据不能替代签名后的 entitlement 检查、运行时进程观察或真实 iPhone 发起的生成结果。
+
+NB-9 已加入固定 OpenAI Responses API 的 model-only adapter、Host Keychain 凭据管理、只允许出站网络的独立 XPC、redirect 拒绝、`store: false` 和 omitted tools。49/49 测试、两目标无签名构建和双 XPC 嵌入检查通过；没有向 OpenAI 发起真实请求，也没有验证 API key、费用、provider failure 或 iPhone 上的实际答案显示，所以 Physical 保持未运行。

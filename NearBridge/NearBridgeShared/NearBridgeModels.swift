@@ -9,6 +9,7 @@ public enum NearBridgePhase: Int, Codable, CaseIterable, Comparable, Sendable {
     case nb6 = 6
     case nb7 = 7
     case nb8 = 8
+    case nb9 = 9
 
     public static func < (lhs: Self, rhs: Self) -> Bool {
         lhs.rawValue < rhs.rawValue
@@ -22,7 +23,7 @@ public enum NearBridgePhase: Int, Codable, CaseIterable, Comparable, Sendable {
 }
 
 public enum NearBridgeBuild {
-    public static let phase = NearBridgePhase.nb8
+    public static let phase = NearBridgePhase.nb9
     public static let automatedStatus = "Automated checkpoint"
     public static let physicalStatus = "Physical validation pending"
 }

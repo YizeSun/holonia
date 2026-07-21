@@ -64,6 +64,19 @@ final class NearBridgeHolonManifestTests: XCTestCase {
         }
     }
 
+    func testOpenAIProfileRequiresNetworkXPCAndHostKeychainWithoutTools() throws {
+        let profile = AdapterExecutionProfile.openAIModelOnly
+
+        XCTAssertNoThrow(try profile.validateForCurrentPlatform())
+        XCTAssertEqual(profile.isolationBoundary, .appSandboxedNetworkXPC)
+        XCTAssertEqual(profile.networkPolicy, .approvedOpenAIResponsesAPI)
+        XCTAssertEqual(profile.credentialPolicy, .hostKeychainAPIKey)
+        XCTAssertFalse(profile.allowsFileRead)
+        XCTAssertFalse(profile.allowsFileWrite)
+        XCTAssertFalse(profile.allowsCommandExecution)
+        XCTAssertFalse(profile.allowsDynamicTools)
+    }
+
     func testManifestRejectsInvalidVersionAndEmptyCapabilities() {
         let manifest = HolonManifest(
             manifestVersion: 999,

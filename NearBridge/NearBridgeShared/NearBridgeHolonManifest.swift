@@ -25,6 +25,7 @@ public enum HolonManifestError: Error, Equatable, LocalizedError {
 public enum HolonIsolationBoundary: String, Codable, Equatable, Sendable {
     case hostProcess
     case appSandboxedXPC
+    case appSandboxedNetworkXPC
     case externalUnverified
     case remoteProvider
 }
@@ -94,7 +95,7 @@ public struct AdapterExecutionProfile: Codable, Equatable, Identifiable, Sendabl
 
     public static let openAIModelOnly = AdapterExecutionProfile(
         profileID: "org.holonia.execution.openai-model-only.v1",
-        isolationBoundary: .remoteProvider,
+        isolationBoundary: .appSandboxedNetworkXPC,
         networkPolicy: .approvedOpenAIResponsesAPI,
         credentialPolicy: .hostKeychainAPIKey,
         disclosure: "Explicit OpenAI Responses API egress · model-only text · no files, commands, workspace, or tools"
@@ -110,7 +111,7 @@ public struct AdapterExecutionProfile: Codable, Equatable, Identifiable, Sendabl
         switch (networkPolicy, credentialPolicy, isolationBoundary) {
         case (.denied, .none, .hostProcess),
              (.denied, .none, .appSandboxedXPC),
-             (.approvedOpenAIResponsesAPI, .hostKeychainAPIKey, .remoteProvider),
+             (.approvedOpenAIResponsesAPI, .hostKeychainAPIKey, .appSandboxedNetworkXPC),
              (.externallyManaged, .externallyManaged, .externalUnverified):
             return
         default:

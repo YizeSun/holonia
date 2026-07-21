@@ -2,7 +2,7 @@
 
 Holonia 是一个面向人、Agent 与组织的能力发现和工作连接网络。它让一个主体在自身能力不足时，可以寻找其他能力、建立私密联系，并在适合的专业网络中完成委托、交付与验收。
 
-项目当前处于概念固定与 NearBridge 通用 Primary Holon 平台实现期，尚未冻结公开协议。NearBridge `NB-0` 的普通 Wi-Fi 真机核心路径已经跑通，`NB-1` 到 `NB-5` 的最终集成纵向链路已有真实 iPhone/Mac 证据；`NB-6` 的 Mac Primary Holon Implementation 选择、统一 Holon adapter 和 Apple 设备端 NaturalLanguage model 也已完成自动化、双目标构建和单一设备对上的真机核心路径。`NB-7` 建立带版本的 manifest、capability registry 和 execution profile，`NB-8` 增加嵌入 Mac App、默认无文件/命令/网络接口的 app-sandboxed Apple Foundation Models XPC runner。NB-7/NB-8 的自动化与构建状态单独记录，不外推为签名运行时或真机结果。延期边界与稳定性矩阵仍未完成，当前不是生产就绪版本。
+项目当前处于概念固定与 NearBridge 通用 Primary Holon 平台验证期，尚未冻结公开协议。NearBridge `NB-0` 的普通 Wi-Fi 真机核心路径已经跑通，`NB-1` 到 `NB-5` 的最终集成纵向链路已有真实 iPhone/Mac 证据；`NB-6` 的 Mac Primary Holon Implementation 选择、统一 Holon adapter 和 Apple 设备端 NaturalLanguage model 也已完成自动化、双目标构建和单一设备对上的真机核心路径。`NB-7` 建立带版本的 manifest、capability registry 和 execution profile；`NB-8` 增加嵌入 Mac App、默认无文件/命令/网络接口的 app-sandboxed Apple Foundation Models XPC runner；`NB-9` 增加由 Mac Host 明确选择、以 Keychain 凭据调用固定 OpenAI Responses API 模型的 model-only adapter。NB-7 至 NB-9 的自动化与构建状态单独记录，不外推为签名运行时、真实 OpenAI 调用或真机结果。延期边界与稳定性矩阵仍未完成，当前不是生产就绪版本。
 
 ## 已确定的命名关系
 
@@ -24,6 +24,7 @@ Holonia 是一个面向人、Agent 与组织的能力发现和工作连接网络
 - [NearBridge NB-6 Primary Holon checkpoint](docs/nearbridge/nb6-results.md)
 - [NearBridge NB-7 通用 Holon contract checkpoint](docs/nearbridge/nb7-results.md)
 - [NearBridge NB-8 隔离本地模型 runner checkpoint](docs/nearbridge/nb8-results.md)
+- [NearBridge NB-9 OpenAI model-only checkpoint](docs/nearbridge/nb9-results.md)
 - [NearBridge 延期验证 TODO](docs/nearbridge/deferred-validation-todo.md)
 - [小型代码任务网络计划](docs/code-network-plan.md)
 - [开放问题和后续决策](docs/open-questions.md)
@@ -33,12 +34,12 @@ Holonia 是一个面向人、Agent 与组织的能力发现和工作连接网络
 1. 已完成 NearBridge 的最小跨设备通信、认证、联系与窄能力调用闭环。
 2. 建立通用 `HolonManifest`、capability registry 和 adapter execution profile。
 3. 把 Host 管理的本地生成模型放入无文件、无命令、默认无网络的隔离 runner；实现和自动化已完成，签名运行时与跨设备结果待真机验证。
-4. 增加明确选择、明确凭据和明确网络披露的 model-only OpenAI adapter，让 iPhone 可以向 Mac 发问并显示回答。
+4. 增加明确选择、明确凭据和明确网络披露的 model-only OpenAI adapter；实现、测试和构建已完成，真实 API 与跨设备结果待用户在 Mac 配置 API key 后验证。
 5. 完成签名第三方 adapter 的准入与隔离协议后，再考虑更强的工具型 Agent。
 
 ## 已实现与仍未实现
 
-当前已经实现：局域网发现、用户配对、稳定 Host 身份、fresh-session 认证、签名/过期/去重消息、联系状态机、Host allowlist capability、Primary Holon Implementation 选择，以及一个真实 Apple 设备端分类模型 adapter。`NB-7` 进一步提供带版本且可验证的 manifest、稳定 capability schema、registry 路由和显式 execution profile；`NB-8` 将 Apple Foundation Models 生成式实现放进嵌入 App 的独立 XPC service。它的源 entitlement 只有 App Sandbox，协议只接受有长度上限的纯文本，不提供路径、凭据、命令或工具；这一隔离声明仍需在签名 Mac 产物和真实跨设备调用中验证。
+当前已经实现：局域网发现、用户配对、稳定 Host 身份、fresh-session 认证、签名/过期/去重消息、联系状态机、Host allowlist capability、Primary Holon Implementation 选择，以及真实 Apple 设备端分类模型 adapter。`NB-7` 进一步提供带版本且可验证的 manifest、稳定 capability schema、registry 路由和显式 execution profile；`NB-8` 将 Apple Foundation Models 生成式实现放进嵌入 App 的独立 XPC service；`NB-9` 将固定 OpenAI model-only 实现放进另一个独立 XPC service。OpenAI 凭据只在 Mac App 输入并保存到 Host Keychain；请求固定到 OpenAI Responses API、`store: false`，不发送 tools，也不提供路径、workspace、shell、Git 或设备控制接口。源 entitlement 和有界协议已经检查；签名 entitlement、真实 API 回答和跨设备显示仍需物理验证。
 
 正在实现的下一条纵向路径是：
 

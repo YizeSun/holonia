@@ -128,4 +128,36 @@ final class NearBridgeReliableMessageTests: XCTestCase {
             XCTAssertEqual($0 as? ReliableMessageError, .invalidSignature)
         }
     }
+
+    func testCapabilityResultSupportsBoundedModelAnswerAndRejectsOversize() throws {
+        let phone = try HostIdentityManager.ephemeral()
+        let mac = try HostIdentityManager.ephemeral()
+        let invocation = try ReliableMessageCodec.makeCapabilityInvocation(
+            input: "Question",
+            sessionID: "session-model",
+            identityManager: phone,
+            nowMilliseconds: 5_000_000
+        )
+        let answer = String(repeating: "a", count: NearBridgeReliableMessage.maximumCapabilityResultCharacters)
+        let result = try ReliableMessageCodec.makeCapabilityResult(
+            for: invocation,
+            output: answer,
+            sessionID: "session-model",
+            identityManager: mac,
+            nowMilliseconds: 5_000_001
+        )
+
+        XCTAssertNoThrow(try ReliableMessageCodec.encode(result))
+
+        let oversized = try ReliableMessageCodec.makeCapabilityResult(
+            for: invocation,
+            output: answer + "x",
+            sessionID: "session-model",
+            identityManager: mac,
+            nowMilliseconds: 5_000_002
+        )
+        XCTAssertThrowsError(try ReliableMessageCodec.encode(oversized)) {
+            XCTAssertEqual($0 as? ReliableMessageError, .invalidCorrelation)
+        }
+    }
 }

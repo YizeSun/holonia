@@ -2,12 +2,14 @@ import Foundation
 import NaturalLanguage
 
 public enum PrimaryHolonImplementationID {
+    public static let openAIModelOnly = "org.holonia.primary-holon.openai-model-only.v1"
     public static let appleFoundationModel = "org.holonia.primary-holon.apple-foundation-model.v1"
     public static let appleNaturalLanguage = "org.holonia.primary-holon.apple-natural-language.v1"
     public static let deterministicDemo = "org.holonia.primary-holon.deterministic-demo.v1"
 }
 
 public enum PrimaryHolonRuntime: String, Codable, Equatable, Sendable {
+    case openAIResponses
     case appleFoundationModels
     case appleNaturalLanguage
     case deterministicSwift
@@ -212,6 +214,58 @@ public struct AppleFoundationModelHolonAdapter: HolonAdapter {
     }
 }
 
+public struct OpenAIModelOnlyHolonAdapter: HolonAdapter {
+    public let manifest = HolonManifest(
+        implementationID: PrimaryHolonImplementationID.openAIModelOnly,
+        vendorID: "org.holonia",
+        displayName: "OpenAI GPT-5.6 Sol (model-only)",
+        adapterLabel: "OpenAIModelOnlyHolonAdapter",
+        runtimeLabel: PrimaryHolonRuntime.openAIResponses.rawValue,
+        modelDisclosure: "Fixed OpenAI Responses API model · explicit network egress · store: false · no tools, files, workspace, commands, or Codex login",
+        capabilities: [HolonCapabilityManifest(
+            capabilityID: ContactDemoCapability.primaryHolonTextInsight,
+            displayName: "Primary Holon inert-text answer",
+            maximumInputCharacters: 1_200,
+            maximumOutputCharacters: 4_000
+        )],
+        executionProfile: .openAIModelOnly
+    )
+
+    private let runner: any RemoteModelRunning
+    private let credentialProvider: @Sendable () throws -> String?
+
+    public init(
+        runner: any RemoteModelRunning = XPCRemoteModelRunner(),
+        credentialProvider: @escaping @Sendable () throws -> String? = {
+            try OpenAIAPIKeyStore().load()
+        }
+    ) {
+        self.runner = runner
+        self.credentialProvider = credentialProvider
+    }
+
+    public func execute(_ request: HolonTextRequest) async throws -> HolonTextResult {
+        let input = request.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !input.isEmpty else { throw CapabilityError.invalidInput }
+        guard input.count <= descriptor.capability.maximumInputCharacters else {
+            throw CapabilityError.inputTooLarge
+        }
+        guard let apiKey = try credentialProvider() else {
+            throw RemoteModelRunnerError.missingCredential
+        }
+        let response = try await runner.generate(RemoteModelRequest(
+            prompt: input,
+            apiKey: apiKey,
+            maximumOutputCharacters: descriptor.capability.maximumOutputCharacters,
+            maximumResponseTokens: 2_048
+        ))
+        guard response.text.count <= descriptor.capability.maximumOutputCharacters else {
+            throw CapabilityError.outputTooLarge
+        }
+        return HolonTextResult(text: response.text)
+    }
+}
+
 struct PrimaryHolonCatalog {
     private let adaptersByID: [String: any HolonAdapter]
 
@@ -227,6 +281,7 @@ struct PrimaryHolonCatalog {
 
     static func standard() -> PrimaryHolonCatalog {
         PrimaryHolonCatalog(adapters: [
+            OpenAIModelOnlyHolonAdapter(),
             AppleFoundationModelHolonAdapter(),
             AppleNaturalLanguageHolonAdapter(),
             DeterministicDemoHolonAdapter()

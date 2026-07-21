@@ -4,6 +4,7 @@ import SwiftUI
 public struct NearBridgeRootView: View {
     @StateObject private var controller: NearBridgeController
     @State private var capabilityInput = "NearBridge lets an iPhone discover and pair with a Mac. The Mac Host exposes only registered capabilities. Signed messages preserve sender, session, expiry, and integrity."
+    @State private var openAIAPIKeyDraft = ""
     @Environment(\.scenePhase) private var scenePhase
 
     public init(role: DeviceRole) {
@@ -14,9 +15,9 @@ public struct NearBridgeRootView: View {
         NavigationStack {
             List {
                 Section {
-                    Label("Sandboxed local model checkpoint", systemImage: "lock.square.stack")
+                    Label("Remote model-only checkpoint", systemImage: "network.badge.shield.half.filled")
                         .foregroundStyle(.orange)
-                    Text("NB-8 runs the Host-managed Apple generative model in an embedded app-sandboxed XPC service. Its interface accepts bounded text only and exposes no file, command, credential, network, workspace, or tool capability.")
+                    Text("NB-9 lets an authenticated iPhone ask a Mac-selected OpenAI model through a separate app-sandboxed network XPC runner. The fixed request sends plain text only with store disabled and no tools, files, workspace, commands, or Codex App/CLI authority.")
                         .font(.caption)
                 }
 
@@ -48,7 +49,8 @@ public struct NearBridgeRootView: View {
                         .disabled(controller.primaryHolonSelectionLocked)
                         LabeledContent("Adapter", value: selected.adapterLabel)
                         LabeledContent("Runtime", value: selected.runtime.rawValue)
-                        LabeledContent("Real model", value: selected.usesRealModel ? "yes · on-device" : "no · deterministic")
+                        LabeledContent("Real model", value: selected.usesRealModel ? "yes" : "no · deterministic")
+                        LabeledContent("Location", value: selected.executionProfile.networkPolicy == .denied ? "on-device" : "remote provider")
                         LabeledContent("Isolation", value: selected.executionProfile.isolationBoundary.rawValue)
                         LabeledContent("Network", value: selected.executionProfile.networkPolicy.rawValue)
                         Text(selected.modelDisclosure)
@@ -65,6 +67,46 @@ public struct NearBridgeRootView: View {
                         }
                     } else {
                         Text("The iPhone does not select or execute the Mac Primary Holon. It can request only the fixed, signed text-insight capability after authentication and contact approval.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                if controller.role == .mac {
+                    Section("OpenAI model-only credential") {
+                        LabeledContent("Status", value: controller.openAIAPIKeyConfigured ? "configured in Host Keychain" : "not configured")
+                        SecureField("OpenAI API key", text: $openAIAPIKeyDraft)
+                            .privacySensitive()
+                        HStack {
+                            Button("Save to Keychain") {
+                                if controller.saveOpenAIAPIKey(openAIAPIKeyDraft) {
+                                    openAIAPIKeyDraft = ""
+                                }
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(
+                                openAIAPIKeyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                                controller.capabilityExecutionState == .executing
+                            )
+                            if controller.openAIAPIKeyConfigured {
+                                Button("Remove key", role: .destructive) {
+                                    controller.removeOpenAIAPIKey()
+                                    openAIAPIKeyDraft = ""
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(controller.capabilityExecutionState == .executing)
+                            }
+                        }
+                        if let issue = controller.openAICredentialIssue {
+                            Text(issue).font(.caption).foregroundStyle(.red)
+                        }
+                        if controller.selectedPrimaryHolon?.implementationID == PrimaryHolonImplementationID.openAIModelOnly,
+                           !controller.openAIAPIKeyConfigured {
+                            Text("The selected remote Primary Holon will reject requests until a key is configured here.")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        }
+                        Text("Enter the key only in this Mac App, never in an iPhone prompt or chat. The Host does not display it again. It is passed in memory to a network-only XPC runner and is never sent to the iPhone or included in diagnostics.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -209,7 +251,7 @@ public struct NearBridgeRootView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                Section("NB-8 Sandboxed Primary Holon demo") {
+                Section("NB-9 Primary Holon question demo") {
                     if controller.registeredCapabilities.isEmpty {
                         Text("This device registers no executable capability.")
                             .font(.caption)

@@ -9,12 +9,13 @@ final class NearBridgePrimaryHolonTests: XCTestCase {
         XCTAssertEqual(
             Set(catalog.descriptors.map(\.implementationID)),
             Set([
+                PrimaryHolonImplementationID.openAIModelOnly,
                 PrimaryHolonImplementationID.appleFoundationModel,
                 PrimaryHolonImplementationID.appleNaturalLanguage,
                 PrimaryHolonImplementationID.deterministicDemo
             ])
         )
-        XCTAssertEqual(catalog.descriptors.filter(\.usesRealModel).count, 2)
+        XCTAssertEqual(catalog.descriptors.filter(\.usesRealModel).count, 3)
         XCTAssertEqual(catalog.defaultAdapter().descriptor.implementationID, PrimaryHolonImplementationID.appleFoundationModel)
     }
 
@@ -126,12 +127,53 @@ final class NearBridgePrimaryHolonTests: XCTestCase {
             maximumResponseTokens: 513
         ).validate())
     }
+
+    func testOpenAIAdapterUsesModelOnlyRunnerAndHostCredential() async throws {
+        let runner = StubRemoteModelRunner(response: RemoteModelResponse(
+            text: "A stronger remote model answer.",
+            model: OpenAIResponsesClient.model,
+            runtimeDisclosure: "test"
+        ))
+        let adapter = OpenAIModelOnlyHolonAdapter(
+            runner: runner,
+            credentialProvider: { "sk-test-12345678901234567890" }
+        )
+
+        let result = try await adapter.execute(HolonTextRequest(text: "Explain this idea."))
+
+        XCTAssertEqual(result.text, "A stronger remote model answer.")
+        XCTAssertEqual(adapter.manifest.executionProfile, .openAIModelOnly)
+        XCTAssertEqual(adapter.descriptor.capability.capabilityID, ContactDemoCapability.primaryHolonTextInsight)
+    }
+
+    func testOpenAIAdapterRejectsMissingHostCredentialWithoutCallingRunner() async {
+        let adapter = OpenAIModelOnlyHolonAdapter(
+            runner: StubRemoteModelRunner(response: RemoteModelResponse(text: "unused", model: "unused", runtimeDisclosure: "unused")),
+            credentialProvider: { nil }
+        )
+
+        do {
+            _ = try await adapter.execute(HolonTextRequest(text: "Question"))
+            XCTFail("Expected a missing credential error")
+        } catch {
+            XCTAssertEqual(error as? RemoteModelRunnerError, .missingCredential)
+        }
+    }
 }
 
 private struct StubSandboxedModelRunner: SandboxedModelRunning {
     let response: SandboxedModelResponse
 
     func generate(_ request: SandboxedModelRequest) async throws -> SandboxedModelResponse {
+        try request.validate()
+        return response
+    }
+}
+
+private struct StubRemoteModelRunner: RemoteModelRunning {
+    let response: RemoteModelResponse
+
+    func generate(_ request: RemoteModelRequest) async throws -> RemoteModelResponse {
         try request.validate()
         return response
     }

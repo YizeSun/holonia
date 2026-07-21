@@ -90,6 +90,17 @@
 
 以下不是稳定性补测，而是明确尚未实现的产品/安全层。保存在这里是为了防止当前 model-only 平台被误解为已经拥有 Codex 工具权限。
 
+### 9.0 NB-9 OpenAI model-only 补充证据
+
+- [ ] 从 NB-9 commit 构建并运行签名 Mac/iPhone App，确认 `NearBridgeOpenAIRunner.xpc` 能启动。
+- [ ] 用 `codesign` 检查实际 XPC entitlement，确认只有 App Sandbox 与 network client，没有文件、命令、automation 或 network server 权限。
+- [ ] 在 Mac App 内保存有效 OpenAI API key，确认 Keychain 状态；不要把 key 输入 iPhone、诊断、截图或聊天。
+- [ ] Mac 选择 OpenAI model-only Primary Holon，完成配对、认证和 Contact；iPhone 发起普通非敏感问题并显示 signed typed answer。
+- [ ] 保存两端结构化诊断截图，确认 Host 接受、isolated runner、result 和 acknowledgement；检查任何事件都不含 credential。
+- [ ] 验证缺失/无效 key、离线、401/403、429、provider failure、超长结果、重复点击和 session 提前结束路径。
+- [ ] 删除 Keychain API key、重启 Mac App并确认状态保持未配置；必要时在 OpenAI 控制台撤销测试 key。
+- [ ] 记录真实 API model、延迟和用量；自动化 stub 测试不能替代 provider 行为或费用证据。
+
 ### 9.1 让 Codex 读取项目并分析
 
 - [ ] 用户在 Mac Host 上显式选择允许的 workspace；远端不能提交任意路径。

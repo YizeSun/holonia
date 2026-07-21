@@ -26,6 +26,8 @@ public final class NearBridgeController: ObservableObject {
     @Published public private(set) var lastCapabilityOutput: String?
     @Published public private(set) var availablePrimaryHolons: [PrimaryHolonDescriptor] = []
     @Published public private(set) var selectedPrimaryHolon: PrimaryHolonDescriptor?
+    @Published public private(set) var openAIAPIKeyConfigured = false
+    @Published public private(set) var openAICredentialIssue: String?
 
     public let role: DeviceRole
     public let phase = NearBridgeBuild.phase
@@ -38,6 +40,7 @@ public final class NearBridgeController: ObservableObject {
     private var capabilityRegistry: NearBridgeCapabilityRegistry
     private let primaryHolonCatalog: PrimaryHolonCatalog
     private let primaryHolonSelectionStore: PrimaryHolonSelectionStore
+    private let openAIAPIKeyStore: OpenAIAPIKeyStore
     private var trustRegistry = NearBridgeTrustRegistry()
     private var pairingMachine = NearBridgePairingStateMachine()
     private var localHello: PairingHello?
@@ -61,13 +64,20 @@ public final class NearBridgeController: ObservableObject {
         self.role = role
         let primaryHolonCatalog = PrimaryHolonCatalog.standard()
         let primaryHolonSelectionStore = PrimaryHolonSelectionStore()
+        let openAIAPIKeyStore = OpenAIAPIKeyStore()
         self.primaryHolonCatalog = primaryHolonCatalog
         self.primaryHolonSelectionStore = primaryHolonSelectionStore
+        self.openAIAPIKeyStore = openAIAPIKeyStore
         if role == .mac {
             let adapter = primaryHolonSelectionStore.load(catalog: primaryHolonCatalog)
             availablePrimaryHolons = primaryHolonCatalog.descriptors
             selectedPrimaryHolon = adapter.descriptor
             capabilityRegistry = .macNB6(adapter: adapter)
+            do {
+                openAIAPIKeyConfigured = try openAIAPIKeyStore.isConfigured()
+            } catch {
+                openAICredentialIssue = error.localizedDescription
+            }
         } else {
             capabilityRegistry = .empty()
         }
@@ -91,6 +101,39 @@ public final class NearBridgeController: ObservableObject {
 
     public var primaryHolonSelectionLocked: Bool {
         [.connecting, .connected, .reconnecting].contains(sessionState) || authenticatedSessionState != .idle
+    }
+
+    @discardableResult
+    public func saveOpenAIAPIKey(_ value: String) -> Bool {
+        guard role == .mac else { return false }
+        guard capabilityExecutionState != .executing else {
+            openAICredentialIssue = "Wait for the active Primary Holon request to finish before changing its credential"
+            return false
+        }
+        do {
+            try openAIAPIKeyStore.save(value)
+            openAIAPIKeyConfigured = true
+            openAICredentialIssue = nil
+            record(category: .capability, state: "credentialStored", detail: "Mac Host stored an OpenAI API key in Keychain; the secret was not logged")
+            return true
+        } catch {
+            openAICredentialIssue = error.localizedDescription
+            record(category: .capability, state: "credentialRejected", error: error, detail: error.localizedDescription)
+            return false
+        }
+    }
+
+    public func removeOpenAIAPIKey() {
+        guard role == .mac, capabilityExecutionState != .executing else { return }
+        do {
+            try openAIAPIKeyStore.remove()
+            openAIAPIKeyConfigured = false
+            openAICredentialIssue = nil
+            record(category: .capability, state: "credentialRemoved", detail: "Mac Host removed the OpenAI API key from Keychain")
+        } catch {
+            openAICredentialIssue = error.localizedDescription
+            record(category: .capability, state: "credentialRemovalFailed", error: error, detail: error.localizedDescription)
+        }
     }
 
     public func selectPrimaryHolon(implementationID: String) {
